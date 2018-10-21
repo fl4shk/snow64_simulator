@@ -43,8 +43,7 @@ public:		// classes
 private:		// variables
 	std::string __data_filename;
 
-	size_t __min_mem_amount_in_bytes, __min_mem_amount_in_words;
-	size_t __real_mem_amount_in_words;
+	size_t __mem_amount_in_bytes, __mem_amount_in_words;
 
 	std::unique_ptr<MemWord[]> __mem;
 
@@ -55,7 +54,7 @@ public:		// functions
 
 	int run();
 
-	gen_getter_by_val(min_mem_amount_in_words)
+	gen_getter_by_val(mem_amount_in_words)
 
 };
 

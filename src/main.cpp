@@ -5,7 +5,7 @@ int main(int argc, char** argv)
 	if (argc != 3)
 	{
 		printerr("Usage:  ", argv[0], " data_filename"
-			"min_mem_amount_in_bytes\n");
+			"mem_amount_in_bytes\n");
 		exit(1);
 	}
 
