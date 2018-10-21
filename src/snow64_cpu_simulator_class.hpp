@@ -43,17 +43,19 @@ public:		// classes
 private:		// variables
 	std::string __data_filename;
 
-	// This is in bytes
-	size_t __min_mem_amount;
+	size_t __min_mem_amount_in_bytes, __min_mem_amount_in_words;
+	size_t __real_mem_amount_in_words;
 
 	std::unique_ptr<MemWord[]> __mem;
 
 public:		// functions
 	Snow64CpuSimulator(const std::string& s_data_filename,
-		size_t s_min_mem_amount);
+		size_t s_min_mem_amount_in_bytes);
 	virtual ~Snow64CpuSimulator();
 
 	int run();
+
+	gen_getter_by_val(min_mem_amount_in_words)
 
 };
 
