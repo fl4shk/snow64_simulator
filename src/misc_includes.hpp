@@ -20,6 +20,7 @@ using namespace liborangepower::misc_util;
 using namespace liborangepower::bitwise;
 using namespace liborangepower::strings;
 
+#include <array>
 
 
 #endif		// src__slash__misc_includes_hpp
