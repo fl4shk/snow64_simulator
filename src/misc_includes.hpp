@@ -13,6 +13,8 @@
 #include "liborangepower_src/misc_defines.hpp"
 #include "liborangepower_src/gen_getter_setter_defines.hpp"
 #include "liborangepower_src/string_conversion_stuff.hpp"
+#include "liborangepower_src/time_stuff.hpp"
+#include "liborangepower_src/memwhatever_wrappers.hpp"
 
 using namespace liborangepower::printout_etc;
 using namespace liborangepower::integer_types;
@@ -21,6 +23,7 @@ using namespace liborangepower::bitwise;
 using namespace liborangepower::strings;
 
 #include <array>
+#include <fenv.h>
 
 
 #endif		// src__slash__misc_includes_hpp

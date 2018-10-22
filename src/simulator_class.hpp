@@ -13,6 +13,16 @@ namespace snow64_simulator
 
 class Simulator
 {
+public:		// enums
+	enum class SyscallType
+	{
+		DispRegs,
+		DispDdestVectorData,
+		DispDdestScalarData,
+		DispDdestAddr,
+		Finish,
+	};
+
 public:		// classes
 
 private:		// variables
@@ -37,7 +47,6 @@ private:		// functions
 		printerr("Error:  ", msg, "\n");
 		exit(1);
 	}
-
 };
 
 } // namespace snow64_simulator

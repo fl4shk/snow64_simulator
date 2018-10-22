@@ -1,6 +1,7 @@
 #include "simulator_class.hpp"
 #include <fstream>
 #include <ctype.h>
+#include <fenv.h>
 
 namespace snow64_simulator
 {
@@ -9,6 +10,8 @@ Simulator::Simulator(const std::string& s_data_filename,
 	size_t s_min_mem_amount_in_bytes) : __data_filename(s_data_filename),
 	__mem_amount_in_bytes(s_min_mem_amount_in_bytes)
 {
+	fesetround(FE_TOWARDZERO);
+
 	__mem_amount_in_words = __mem_amount_in_bytes
 		/ sizeof(BasicWord);
 
