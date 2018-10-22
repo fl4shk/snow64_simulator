@@ -13,6 +13,7 @@ inline Address convert_addr_to_bw_addr(Address to_convert);
 inline Address convert_addr_to_bw_instr_offset(Address to_convert);
 
 
+
 class BasicWord
 {
 public:		// constants
@@ -50,12 +51,6 @@ public:		// functions
 inline Address convert_addr_to_bw_addr(Address to_convert)
 {
 	return (to_convert / sizeof(BasicWord::num_data_elems));
-}
-
-inline Address convert_addr_to_bw_instr_offset(Address to_convert)
-{
-	return ((to_convert % sizeof(BasicWord::num_data_elems))
-		& (~static_cast<Address>(3)));
 }
 
 } // namespace snow64_simulator

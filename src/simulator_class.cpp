@@ -33,115 +33,112 @@ Simulator::Simulator(const std::string& s_data_filename,
 	}
 
 
-	//{
-	//size_t word_addr = 0;
-	//std::ifstream data_ifstream(__data_filename);
-	//std::string line;
+	{
+	size_t word_addr = 0;
+	std::ifstream data_ifstream(__data_filename);
+	std::string line;
 
-	//while (!data_ifstream.eof())
-	//{
-	//	std::getline(data_ifstream, line, '\n');
+	while (!data_ifstream.eof())
+	{
+		std::getline(data_ifstream, line, '\n');
 
-	//	if (line.size() == 0)
-	//	{
-	//		continue;
-	//	}
+		if (line.size() == 0)
+		{
+			continue;
+		}
 
-	//	if (word_addr >= mem_amount_in_words())
-	//	{
-	//		err(sconcat("Too few memory words requested for input data."));
-	//	}
+		if (word_addr >= mem_amount_in_words())
+		{
+			err(sconcat("Too few memory words requested for input data."));
+		}
 
-	//	// Change address
-	//	if (line.at(0) == '@')
-	//	{
-	//		u64 n_addr = 0; 
-	//		for (size_t i=1; i<line.size(); ++i)
-	//		{
-	//			n_addr <<= 4;
-	//			if ((line.at(i) >= '0') && (line.at(i) <= '9'))
-	//			{
-	//				n_addr |= (line.at(i) - '0');
-	//			}
-	//			else if ((line.at(i) >= 'a') && (line.at(i) <= 'f'))
-	//			{
-	//				n_addr |= (line.at(i) - 'a' + 0xa);
-	//			}
-	//			else
-	//			{
-	//				err(sconcat("Invalid address change."));
-	//			}
-	//		}
+		// Change address
+		if (line.at(0) == '@')
+		{
+			u64 n_addr = 0; 
+			for (size_t i=1; i<line.size(); ++i)
+			{
+				n_addr <<= 4;
+				if ((line.at(i) >= '0') && (line.at(i) <= '9'))
+				{
+					n_addr |= (line.at(i) - '0');
+				}
+				else if ((line.at(i) >= 'a') && (line.at(i) <= 'f'))
+				{
+					n_addr |= (line.at(i) - 'a' + 0xa);
+				}
+				else
+				{
+					err(sconcat("Invalid address change."));
+				}
+			}
 
-	//		word_addr = n_addr;
-	//	}
-	//	// Raw memory word
-	//	else
-	//	{
-	//		if (line.size() != (sizeof(BasicWord) * 2))
-	//		{
-	//			err(sconcat("Invalid line of initial memory contents."));
-	//		}
+			word_addr = n_addr;
+		}
+		// Raw memory word
+		else
+		{
+			if (line.size() != (sizeof(BasicWord) * 2))
+			{
+				err(sconcat("Invalid line of initial memory contents."));
+			}
 
-	//		std::vector<std::string> mem_words_str_vec;
-	//		for (size_t i=0; i<BasicWord::num_data_elems; ++i)
-	//		{
-	//			mem_words_str_vec.push_back(std::string());
-	//		}
+			for (size_t i=0; i<BasicWord::num_data_elems; ++i)
+			{
+				u8& n_data = __mem[word_addr].data[i];
+				n_data = 0;
 
-	//		size_t j=0;
-	//		for (s64 i=BasicWord::num_data_elems-1; i>=0; --i)
-	//		{
-	//			mem_words_str_vec.at(i) = line.substr(j, sizeof(u32) * 2);
-	//			j += (sizeof(u32) * 2);
-	//		}
+				for (size_t j=0; j<(sizeof(u8) * 2); ++j)
+				{
+					const size_t index
+						= ((BasicWord::num_data_elems - i - 1) * 2) + j;
+					n_data <<= 4;
 
-	//		//for (size_t i=0; i<mem_words_str_vec.size(); ++i)
-	//		//{
-	//		//	printout(mem_words_str_vec.at(i), "\n");
-	//		//}
+					if ((line.at(index) >= '0') && (line.at(index) <= '9'))
+					{
+						n_data |= (line.at(index) - '0');
+					}
+					else if ((line.at(index) >= 'a')
+						&& (line.at(index) <= 'f'))
+					{
+						n_data |= (line.at(index) - 'a' + 0xa);
+					}
+					else
+					{
+						err(sconcat("Invalid line of data."));
+					}
+				}
+			}
 
+			++word_addr;
+		}
 
-	//		for (size_t i=0; i<mem_words_str_vec.size(); ++i)
-	//		{
-	//			u32 instr_or_data = 0;
-	//			const auto& curr_str = mem_words_str_vec.at(i);
-	//			for (j=0; j<curr_str.size(); ++j)
-	//			{
-	//				instr_or_data <<= 4;
-	//				if ((curr_str.at(j) >= '0') && (curr_str.at(j) <= '9'))
-	//				{
-	//					instr_or_data |= (curr_str.at(j) - '0');
-	//				}
-	//				else if ((curr_str.at(j) >= 'a')
-	//					&& (curr_str.at(j) <= 'f'))
-	//				{
-	//					instr_or_data |= (curr_str.at(j) - 'a' + 0xa);
-	//				}
-	//				else
-	//				{
-	//					err(sconcat("Invalid line of initial mem ",
-	//						"contents."));
-	//				}
-	//			}
+	}
 
-	//			__mem[word_addr].data[i] = instr_or_data;
-	//		}
-
-
-	//		++word_addr;
-	//	}
-
-	//}
-
-	//}
+	}
 
 	//for (size_t i=0; i<mem_amount_in_words(); ++i)
 	//{
-	//	for (size_t j=0; j<BasicWord::num_data_elems; ++j)
+	//	for (size_t j=0; j<BasicWord::num_data_elems; j+=4)
 	//	{
-	//		printout(std::hex, __mem[i].data[j], std::dec, " ");
+	//		//u32 temp = 0;
+	//		//set_bits_with_range(temp, __mem[i].data[j + 0], 31, 24);
+	//		//set_bits_with_range(temp, __mem[i].data[j + 1], 23, 16);
+	//		//set_bits_with_range(temp, __mem[i].data[j + 2], 15, 8);
+	//		//set_bits_with_range(temp, __mem[i].data[j + 3], 7, 0);
+
+	//		u32 temp = ((__mem[i].data[j + 0] << 0)
+	//			| (__mem[i].data[j + 1] << 8)
+	//			| (__mem[i].data[j + 2] << 16)
+	//			| (__mem[i].data[j + 3] << 24));
+	//		printout(std::hex, temp, std::dec, " ");
 	//	}
+	//	//for (size_t j=0; j<BasicWord::num_data_elems; ++j)
+	//	//{
+	//	//	printout(std::hex, static_cast<u32>(__mem[i].data[j]),
+	//	//		std::dec, " ");
+	//	//}
+
 	//	printout("\n");
 	//}
 }

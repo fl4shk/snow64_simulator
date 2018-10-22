@@ -6,17 +6,21 @@ namespace snow64_simulator
 
 LarFile::LarFile()
 {
+	for (size_t i=0; i<__lar_tag_stack.size(); ++i)
+	{
+		__lar_tag_stack[i] = i;
+	}
 }
 
 LarFile::~LarFile()
 {
 }
 
-void LarFile::perf_ldst(bool is_store, size_t index, Address eff_addr,
+void LarFile::perf_ldst(bool is_store, size_t ddest_index, Address eff_addr,
 	DataType n_data_type, IntTypeSize n_int_type_size,
 	std::unique_ptr<BasicWord[]>& mem, size_t mem_amount_in_words)
 {
-	if (index == 0)
+	if (ddest_index == 0)
 	{
 		return;
 	}
@@ -36,51 +40,57 @@ void LarFile::perf_ldst(bool is_store, size_t index, Address eff_addr,
 	const Address n_data_offset = get_bits_with_range(eff_addr,
 		(WIDTH__METADATA_DATA_OFFSET - 1), 0);
 
-	//LarMetadata& metadata = __lar_metadata[index];
 
-	//u8 tag_search_arr[ARR_SIZE__NUM_LARS];
-	//bool cmp_ref_count_arr[ARR_SIZE__NUM_LARS];
-	//bool cmp_base_addr_arr[ARR_SIZE__NUM_LARS];
-	//bool cmp_result_arr[ARR_SIZE__NUM_LARS];
-	//u8 mask_arr[ARR_SIZE__NUM_LARS];
+	u8 temp_tag_search_arr[ARR_SIZE__NUM_LARS];
+	u8 tag_search = 0;
 
+	for (size_t i=0; i<ARR_SIZE__NUM_LARS; ++i)
+	{
+		temp_tag_search_arr[i] = perf_temp_tag_search(i, n_base_addr);
+	}
 
-	////u8 tag_search__2_to_3, tag_search__4_to_5, tag_search__6_to_7,
-	////	tag_search__8_to_9, tag_search__10_to_11, tag_search__12_to_13,
-	////	tag_search__14_to_15;
+	for (size_t i=0; i<ARR_SIZE__NUM_LARS; ++i)
+	{
+		tag_search |= temp_tag_search_arr[i];
+	}
 
-	////for (size_t i=0; i<ARR_SIZE__NUM_LARS; ++i)
-	////{
-	////	tag_search_arr[i] = perf_tag_search(i, index, n_base_addr);
-	////}
+	auto& ddest_metadata = __lar_metadata[ddest_index];
+	ddest_metadata.data_offset = n_data_offset;
+	ddest_metadata.data_type = n_data_type;
+	ddest_metadata.int_type_size = n_int_type_size;
 
-	////for (size_t i=0; i<ARR_SIZE__NUM_LARS; ++i)
-	////{
-	////}
-	////for (size_t i=0; i<ARR_SIZE__NUM_LARS; ++i)
-	////{
-	////}
-	//for (size_t i=0; i<ARR_SIZE__NUM_LARS; ++i)
-	//{
-	//	cmp_ref_count_arr[i] = (__lar_shareddata[i].ref_count != 0);
-	//	cmp_base_addr_arr[i] = (__lar_shareddata[i].base_addr
-	//		== n_base_addr);
-	//	cmp_result_arr[i] = (cmp_ref_count_arr[i] && cmp_base_addr_arr[i]);
-	//}
+	switch (tag_search != 0)
+	{
+	case false:
+		handle_ldst_miss(is_store, ddest_metadata, n_base_addr,
+			n_data_offset, mem);
+		break;
 
-	//asm_comment("Will this be vectorized?");
-	//for (size_t i=0; i<ARR_SIZE__NUM_LARS; ++i)
-	//{
-	//	tag_search_arr[i] = cmp_result_arr[i] ? index : 0;
-	//}
-
-	//asm_comment("Let's see.");
-
-	//for (size_t i=0; i<ARR_SIZE__NUM_LARS; ++i)
-	//{
-	//	printout(tag_search_arr[i], "\n");
-	//}
+	case true:
+		handle_ldst_hit(is_store, ddest_metadata, n_base_addr,
+			n_data_offset, mem, tag_search);
+		break;
+	}
 
 }
+
+
+void LarFile::handle_ldst_hit(bool is_store, LarMetadata& ddest_metadata,
+	Address n_base_addr, Address n_data_offset,
+	std::unique_ptr<BasicWord[]>& mem, u8 tag_search)
+{
+	if (ddest_metadata.tag == tag_search)
+	{
+		return;
+	}
+
+	ddest_metadata.tag = tag_search;
+}
+void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
+	Address n_base_addr, Address n_data_offset,
+	std::unique_ptr<BasicWord[]>& mem)
+{
+}
+
 
 } // namespace snow64_simulator

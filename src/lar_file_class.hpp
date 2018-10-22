@@ -64,34 +64,19 @@ public:		// classes
 	class LarMetadata
 	{
 	public:		// variables
-		u8 tag;
-		u8 data_offset;
-		DataType data_type;
-		IntTypeSize int_type_size;
+		u8 tag = 0;
+		u8 data_offset = 0;
+		DataType data_type = DataType::UnsgnInt;
+		IntTypeSize int_type_size = IntTypeSize::Sz8;
 
 	public:		// functions
 		inline LarMetadata()
 		{
-			tag = 0;
-			data_offset = 0;
-			data_type = DataType::UnsgnInt;
-			int_type_size = IntTypeSize::Sz8;
 		}
 
-		inline LarMetadata(const LarMetadata& to_copy)
-		{
-			*this = to_copy;
-		}
-
+		inline LarMetadata(const LarMetadata& to_copy) = default;
 		inline LarMetadata& operator = (const LarMetadata& to_copy)
-		{
-			tag = to_copy.tag;
-			data_offset = to_copy.data_offset;
-			data_type = to_copy.data_type;
-			int_type_size = to_copy.int_type_size;
-
-			return *this;
-		}
+			= default;
 	};
 
 
@@ -100,32 +85,19 @@ public:		// classes
 	public:		// variables
 		BasicWord data;
 
-		u8 ref_count;
-		size_t base_addr;
+		u8 ref_count = 0;
+		u64 base_addr = 0;
 
-		bool dirty;
+		bool dirty = false;
 
 	public:		// functions
 		inline LarShareddata()
 		{
-			ref_count = 0;
-			base_addr = 0;
-			dirty = 0;
 		}
 
-		inline LarShareddata(const LarShareddata& to_copy)
-		{
-			*this = to_copy;
-		}
-
+		inline LarShareddata(const LarShareddata& to_copy) = default;
 		inline LarShareddata& operator = (const LarShareddata& to_copy)
-		{
-			data = to_copy.data;
-			ref_count = to_copy.ref_count;
-			base_addr = to_copy.base_addr;
-			dirty = to_copy.dirty;
-			return *this;
-		}
+			= default;
 	};
 
 	class RefLarContents
@@ -149,40 +121,41 @@ public:		// classes
 private:		// variables
 	std::array<LarMetadata, ARR_SIZE__NUM_LARS> __lar_metadata;
 	std::array<LarShareddata, ARR_SIZE__NUM_LARS> __lar_shareddata;
+	std::array<u8, ARR_SIZE__NUM_LARS> __lar_tag_stack;
 
 public:		// functions
 	LarFile();
 	virtual ~LarFile();
 
-	inline void read_from(size_t ra_index, size_t rb_index,
-		size_t rc_index,
-		RefLarContents& ra_contents, RefLarContents& rb_contents,
-		RefLarContents& rc_contents)
+	inline void read_from(size_t ddest_index, size_t dsrc0_index,
+		size_t dsrc1_index,
+		RefLarContents& ddest_contents, RefLarContents& dsrc0_contents,
+		RefLarContents& dsrc1_contents)
 	{
-		ra_contents.metadata = &__lar_metadata[ra_index];
-		ra_contents.shareddata = &__lar_shareddata[ra_contents.metadata
-			->tag];
+		ddest_contents.metadata = &__lar_metadata[ddest_index];
+		ddest_contents.shareddata = &__lar_shareddata[ddest_contents
+			.metadata->tag];
 
-		rb_contents.metadata = &__lar_metadata[rb_index];
-		rb_contents.shareddata = &__lar_shareddata[rb_contents.metadata
-			->tag];
+		dsrc0_contents.metadata = &__lar_metadata[dsrc0_index];
+		dsrc0_contents.shareddata = &__lar_shareddata[dsrc0_contents
+			.metadata->tag];
 
-		rc_contents.metadata = &__lar_metadata[rc_index];
-		rc_contents.shareddata = &__lar_shareddata[rc_contents.metadata
-			->tag];
+		dsrc1_contents.metadata = &__lar_metadata[dsrc1_index];
+		dsrc1_contents.shareddata = &__lar_shareddata[dsrc1_contents
+			.metadata->tag];
 	}
 	
 
-	//inline void write_arithlog_results(size_t index,
-	//	const BasicWord& n_data)
-	//{
-	//	if (index != 0)
-	//	{
-	//		__lar_shareddata[__lar_metadata[index].tag].data = n_data;
-	//	}
-	//}
+	inline void write_arithlog_results(const RefLarContents& ddest_contents,
+		const BasicWord& n_data)
+	{
+		if (ddest_contents.metadata->tag != 0)
+		{
+			ddest_contents.shareddata->data = n_data;
+		}
+	}
 
-	void perf_ldst(bool is_store, size_t index, Address eff_addr,
+	void perf_ldst(bool is_store, size_t ddest_index, Address eff_addr,
 		DataType n_data_type, IntTypeSize n_int_type_size,
 		std::unique_ptr<BasicWord[]>& mem, size_t mem_amount_in_words);
 
@@ -190,13 +163,19 @@ public:		// functions
 	//void continue_ldst(const BasicWord& )
 
 private:		// functions
-	//inline size_t perf_tag_search(size_t i, size_t index,
-	//	size_t n_base_addr)
-	//{
-	//	return (((__lar_shareddata[i].ref_count != 0)
-	//		&& (__lar_shareddata[i].base_addr == n_base_addr))
-	//		? index : 0);
-	//}
+	inline u8 perf_temp_tag_search(size_t i, Address n_base_addr) const
+	{
+		return (((__lar_shareddata[i].ref_count != 0)
+			&& (__lar_shareddata[i].base_addr == n_base_addr))
+			? i : 0);
+	}
+
+	void handle_ldst_hit(bool is_store, LarMetadata& ddest_metadata,
+		Address n_base_addr, Address n_data_offset,
+		std::unique_ptr<BasicWord[]>& mem, u8 tag_search);
+	void handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
+		Address n_base_addr, Address n_data_offset,
+		std::unique_ptr<BasicWord[]>& mem);
 };
 
 } // namespace snow64_simulator
