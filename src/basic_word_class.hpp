@@ -4,6 +4,7 @@
 // src/basic_word_class.hpp
 
 #include "misc_includes.hpp"
+#include "global_constants.hpp"
 
 namespace snow64_simulator
 {
@@ -15,9 +16,10 @@ inline Address convert_addr_to_bw_instr_offset(Address to_convert);
 class BasicWord
 {
 public:		// constants
-	static constexpr size_t num_data_elems = 8;
+	static constexpr size_t num_data_elems
+		= (1 << constants::lar_file::WIDTH__METADATA_DATA_OFFSET);
 public:		// variables
-	u32 data[num_data_elems];
+	u8 data[num_data_elems];
 
 public:		// functions
 	inline BasicWord()
@@ -47,12 +49,12 @@ public:		// functions
 
 inline Address convert_addr_to_bw_addr(Address to_convert)
 {
-	return (to_convert / sizeof(BasicWord));
+	return (to_convert / sizeof(BasicWord::num_data_elems));
 }
 
 inline Address convert_addr_to_bw_instr_offset(Address to_convert)
 {
-	return ((to_convert % sizeof(BasicWord))
+	return ((to_convert % sizeof(BasicWord::num_data_elems))
 		& (~static_cast<Address>(3)));
 }
 

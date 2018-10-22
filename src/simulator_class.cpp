@@ -33,108 +33,108 @@ Simulator::Simulator(const std::string& s_data_filename,
 	}
 
 
-	{
-	size_t word_addr = 0;
-	std::ifstream data_ifstream(__data_filename);
-	std::string line;
+	//{
+	//size_t word_addr = 0;
+	//std::ifstream data_ifstream(__data_filename);
+	//std::string line;
 
-	while (!data_ifstream.eof())
-	{
-		std::getline(data_ifstream, line, '\n');
+	//while (!data_ifstream.eof())
+	//{
+	//	std::getline(data_ifstream, line, '\n');
 
-		if (line.size() == 0)
-		{
-			continue;
-		}
+	//	if (line.size() == 0)
+	//	{
+	//		continue;
+	//	}
 
-		if (word_addr >= mem_amount_in_words())
-		{
-			err(sconcat("Too few memory words requested for input data."));
-		}
+	//	if (word_addr >= mem_amount_in_words())
+	//	{
+	//		err(sconcat("Too few memory words requested for input data."));
+	//	}
 
-		// Change address
-		if (line.at(0) == '@')
-		{
-			u64 n_addr = 0; 
-			for (size_t i=1; i<line.size(); ++i)
-			{
-				n_addr <<= 4;
-				if ((line.at(i) >= '0') && (line.at(i) <= '9'))
-				{
-					n_addr |= (line.at(i) - '0');
-				}
-				else if ((line.at(i) >= 'a') && (line.at(i) <= 'f'))
-				{
-					n_addr |= (line.at(i) - 'a' + 0xa);
-				}
-				else
-				{
-					err(sconcat("Invalid address change."));
-				}
-			}
+	//	// Change address
+	//	if (line.at(0) == '@')
+	//	{
+	//		u64 n_addr = 0; 
+	//		for (size_t i=1; i<line.size(); ++i)
+	//		{
+	//			n_addr <<= 4;
+	//			if ((line.at(i) >= '0') && (line.at(i) <= '9'))
+	//			{
+	//				n_addr |= (line.at(i) - '0');
+	//			}
+	//			else if ((line.at(i) >= 'a') && (line.at(i) <= 'f'))
+	//			{
+	//				n_addr |= (line.at(i) - 'a' + 0xa);
+	//			}
+	//			else
+	//			{
+	//				err(sconcat("Invalid address change."));
+	//			}
+	//		}
 
-			word_addr = n_addr;
-		}
-		// Raw memory word
-		else
-		{
-			if (line.size() != (sizeof(BasicWord) * 2))
-			{
-				err(sconcat("Invalid line of initial memory contents."));
-			}
+	//		word_addr = n_addr;
+	//	}
+	//	// Raw memory word
+	//	else
+	//	{
+	//		if (line.size() != (sizeof(BasicWord) * 2))
+	//		{
+	//			err(sconcat("Invalid line of initial memory contents."));
+	//		}
 
-			std::vector<std::string> mem_words_str_vec;
-			for (size_t i=0; i<BasicWord::num_data_elems; ++i)
-			{
-				mem_words_str_vec.push_back(std::string());
-			}
+	//		std::vector<std::string> mem_words_str_vec;
+	//		for (size_t i=0; i<BasicWord::num_data_elems; ++i)
+	//		{
+	//			mem_words_str_vec.push_back(std::string());
+	//		}
 
-			size_t j=0;
-			for (s64 i=BasicWord::num_data_elems-1; i>=0; --i)
-			{
-				mem_words_str_vec.at(i) = line.substr(j, sizeof(u32) * 2);
-				j += (sizeof(u32) * 2);
-			}
+	//		size_t j=0;
+	//		for (s64 i=BasicWord::num_data_elems-1; i>=0; --i)
+	//		{
+	//			mem_words_str_vec.at(i) = line.substr(j, sizeof(u32) * 2);
+	//			j += (sizeof(u32) * 2);
+	//		}
 
-			//for (size_t i=0; i<mem_words_str_vec.size(); ++i)
-			//{
-			//	printout(mem_words_str_vec.at(i), "\n");
-			//}
-
-
-			for (size_t i=0; i<mem_words_str_vec.size(); ++i)
-			{
-				u32 instr_or_data = 0;
-				const auto& curr_str = mem_words_str_vec.at(i);
-				for (j=0; j<curr_str.size(); ++j)
-				{
-					instr_or_data <<= 4;
-					if ((curr_str.at(j) >= '0') && (curr_str.at(j) <= '9'))
-					{
-						instr_or_data |= (curr_str.at(j) - '0');
-					}
-					else if ((curr_str.at(j) >= 'a')
-						&& (curr_str.at(j) <= 'f'))
-					{
-						instr_or_data |= (curr_str.at(j) - 'a' + 0xa);
-					}
-					else
-					{
-						err(sconcat("Invalid line of initial mem ",
-							"contents."));
-					}
-				}
-
-				__mem[word_addr].data[i] = instr_or_data;
-			}
+	//		//for (size_t i=0; i<mem_words_str_vec.size(); ++i)
+	//		//{
+	//		//	printout(mem_words_str_vec.at(i), "\n");
+	//		//}
 
 
-			++word_addr;
-		}
+	//		for (size_t i=0; i<mem_words_str_vec.size(); ++i)
+	//		{
+	//			u32 instr_or_data = 0;
+	//			const auto& curr_str = mem_words_str_vec.at(i);
+	//			for (j=0; j<curr_str.size(); ++j)
+	//			{
+	//				instr_or_data <<= 4;
+	//				if ((curr_str.at(j) >= '0') && (curr_str.at(j) <= '9'))
+	//				{
+	//					instr_or_data |= (curr_str.at(j) - '0');
+	//				}
+	//				else if ((curr_str.at(j) >= 'a')
+	//					&& (curr_str.at(j) <= 'f'))
+	//				{
+	//					instr_or_data |= (curr_str.at(j) - 'a' + 0xa);
+	//				}
+	//				else
+	//				{
+	//					err(sconcat("Invalid line of initial mem ",
+	//						"contents."));
+	//				}
+	//			}
 
-	}
+	//			__mem[word_addr].data[i] = instr_or_data;
+	//		}
 
-	}
+
+	//		++word_addr;
+	//	}
+
+	//}
+
+	//}
 
 	//for (size_t i=0; i<mem_amount_in_words(); ++i)
 	//{

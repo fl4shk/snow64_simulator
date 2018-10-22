@@ -65,7 +65,8 @@ endif
 
 FINAL_BASE_FLAGS:=$(OPTIMIZATION_LEVEL) \
 	$(EXTRA_BASE_FLAGS) $(EXTRA_DEBUG_FLAGS) \
-	-mavx
+	-fopt-info-vec -mavx -ftree-vectorize
+	#-fopt-info-vec -fopt-info-vec-missed -mavx -ftree-vectorize
 
 # Final compiler and linker flags
 CXX_FLAGS:=$(CXX_FLAGS) $(FINAL_BASE_FLAGS)

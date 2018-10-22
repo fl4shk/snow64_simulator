@@ -5,7 +5,6 @@
 
 #include "misc_includes.hpp"
 #include "basic_word_class.hpp"
-#include "lar_file_class.hpp"
 
 namespace snow64_simulator
 {
