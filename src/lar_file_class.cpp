@@ -149,7 +149,7 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 {
 	const auto old_metadata = ddest_metadata;
 	auto& curr_shareddata = __lar_shareddata[old_metadata.tag];
-	const auto old_shareddata = curr_shareddata;
+	const auto old_base_addr = curr_shareddata.base_addr;
 
 	switch (curr_shareddata.ref_count)
 	{
@@ -183,13 +183,12 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 	case 1:
 		curr_shareddata.base_addr = n_base_addr;
 
-		switch (old_shareddata.dirty)
+		switch (curr_shareddata.dirty)
 		{
 		case true:
 			// When an address's data is no longer in the LAR file, it must
 			// be sent to memory iff the data has been changed.
-			store_to_mem(old_shareddata.data, old_shareddata.base_addr,
-				mem);
+			store_to_mem(curr_shareddata.data, old_base_addr, mem);
 			if (!is_store)
 			{
 				// Loads of fresh data mark us as clean.
@@ -245,7 +244,7 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 			case true:
 				// Make a copy of our old data over to the freshly
 				// allocated element of shared data.
-				n_shareddata.data = old_shareddata.data;
+				n_shareddata.data = curr_shareddata.data;
 
 				// Also, since this is a store, mark the **copy** of our
 				// old data as dirty.
