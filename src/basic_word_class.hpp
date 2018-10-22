@@ -42,7 +42,6 @@ public:		// functions
 		{
 			data[i] = to_copy.data[i];
 		}
-
 		return *this;
 	}
 

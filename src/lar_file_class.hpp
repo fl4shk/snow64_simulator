@@ -122,6 +122,7 @@ private:		// variables
 	std::array<LarMetadata, ARR_SIZE__NUM_LARS> __lar_metadata;
 	std::array<LarShareddata, ARR_SIZE__NUM_LARS> __lar_shareddata;
 	std::array<u8, ARR_SIZE__NUM_LARS> __lar_tag_stack;
+	u8 __curr_tag_stack_index;
 
 public:		// functions
 	LarFile();
@@ -151,6 +152,8 @@ public:		// functions
 	{
 		if (ddest_contents.metadata->tag != 0)
 		{
+			// Oh yeah, this marks us as dirty!
+			ddest_contents.shareddata->dirty = true;
 			ddest_contents.shareddata->data = n_data;
 		}
 	}
@@ -176,6 +179,30 @@ private:		// functions
 	void handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 		Address n_base_addr, Address n_data_offset,
 		std::unique_ptr<BasicWord[]>& mem);
+
+	inline u8 alloc_tag()
+	{
+		const auto ret = __lar_tag_stack[__curr_tag_stack_index];
+		--__curr_tag_stack_index;
+
+		return ret;
+	}
+	inline void dealloc_tag(u8 old_tag)
+	{
+		++__curr_tag_stack_index;
+		__lar_tag_stack[__curr_tag_stack_index] = old_tag;
+	}
+
+	inline void load_from_mem(BasicWord& ret, Address base_addr,
+		std::unique_ptr<BasicWord[]>& mem)
+	{
+		ret = mem[convert_addr_to_bw_addr(base_addr)];
+	}
+	inline void store_to_mem(const BasicWord& to_store, Address base_addr,
+		std::unique_ptr<BasicWord[]>& mem)
+	{
+		mem[convert_addr_to_bw_addr(base_addr)] = to_store;
+	}
 };
 
 } // namespace snow64_simulator
