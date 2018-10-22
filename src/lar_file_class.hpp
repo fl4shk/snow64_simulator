@@ -203,7 +203,6 @@ private:		// functions
 	{
 		mem[convert_addr_to_bw_addr(base_addr)] = to_store;
 	}
-
 };
 
 } // namespace snow64_simulator
