@@ -89,8 +89,8 @@ void LarFile::handle_ldst_hit(bool is_store, LarMetadata& ddest_metadata,
 
 	ddest_metadata.tag = tag_search;
 
-	auto& old_shareddata = __lar_shareddata[old_tag];
 	auto& n_shareddata = __lar_shareddata[tag_search];
+	auto& curr_shareddata = __lar_shareddata[old_tag];
 
 
 
@@ -102,13 +102,13 @@ void LarFile::handle_ldst_hit(bool is_store, LarMetadata& ddest_metadata,
 	if (is_store)
 	{
 		// Make of a copy of our data to the new address.
-		n_shareddata.data = old_shareddata.data;
+		n_shareddata.data = curr_shareddata.data;
 
 		// Stores mark our data as dirty.
 		n_shareddata.dirty = true;
 	}
 
-	switch (old_shareddata.ref_count)
+	switch (curr_shareddata.ref_count)
 	{
 	// We didn't have ANY element of shared data yet.
 	case 0:
@@ -120,24 +120,24 @@ void LarFile::handle_ldst_hit(bool is_store, LarMetadata& ddest_metadata,
 
 		// As we've been deallocated, we need to write our old data
 		// back to memory if it's not already up to date.
-		if (old_shareddata.dirty)
+		if (curr_shareddata.dirty)
 		{
-			store_to_mem(old_shareddata.data, old_shareddata.base_addr,
+			store_to_mem(curr_shareddata.data, curr_shareddata.base_addr,
 				mem);
 		}
 
 		// This is also part of deallocating the element of shared data,
-		// especially setting old_shareddata.ref_count to zero, as that
+		// especially setting curr_shareddata.ref_count to zero, as that
 		// prevents this element of shared data being used during the tag
 		// search.
-		old_shareddata.ref_count = 0;
-		old_shareddata.dirty = false;
+		curr_shareddata.ref_count = 0;
+		curr_shareddata.dirty = false;
 		break;
 
 	// There was at least one other reference to us, so don't deallocate
 	// anything, but do decrement our old reference count.
 	default:
-		--old_shareddata.ref_count;
+		--curr_shareddata.ref_count;
 		break;
 	}
 
@@ -193,8 +193,7 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 			if (!is_store)
 			{
 				// Loads of fresh data mark us as clean.
-				load_from_mem(curr_shareddata.data,
-					curr_shareddata.base_addr, mem);
+				load_from_mem(curr_shareddata.data, n_base_addr, mem);
 				curr_shareddata.dirty = false;
 			}
 			break;
@@ -206,8 +205,7 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 			switch (is_store)
 			{
 			case false:
-				load_from_mem(curr_shareddata.data,
-					curr_shareddata.base_addr, mem);
+				load_from_mem(curr_shareddata.data, n_base_addr, mem);
 				break;
 
 			case true:
@@ -239,8 +237,7 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 				// do not need to store it back to memory yet, but since
 				// nobody has our new address, we need to load that
 				// address's data from memory.
-				load_from_mem(n_shareddata.data, n_shareddata.base_addr,
-					mem);
+				load_from_mem(n_shareddata.data, n_base_addr, mem);
 				// Loads of fresh data mark us as clean
 				n_shareddata.dirty = false;
 				break;
