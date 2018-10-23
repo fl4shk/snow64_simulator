@@ -19,12 +19,12 @@ Simulator::Simulator(const std::string& s_data_filename,
 		++__mem_amount_in_words;
 	}
 
-	//printout("__data_filename:  ", __data_filename, "\n");
-	printout("__mem_amount_in_bytes:  ",
-		__mem_amount_in_bytes, "\n");
+	////printout("__data_filename:  ", __data_filename, "\n");
+	//printout("__mem_amount_in_bytes:  ",
+	//	__mem_amount_in_bytes, "\n");
 
-	printout("__mem_amount_in_words:  ", __mem_amount_in_words,
-		"\n");
+	//printout("__mem_amount_in_words:  ", __mem_amount_in_words,
+	//	"\n");
 
 	__mem.reset(new BasicWord[mem_amount_in_words()]);
 
@@ -154,7 +154,7 @@ int Simulator::run()
 
 	for (;;)
 	{
-		printout(std::hex, __pc, std::dec, ":  ");
+		//printout(std::hex, __pc, std::dec, ":  ");
 		perf_instr_fetch();
 		perf_instr_decode();
 
@@ -216,227 +216,227 @@ void Simulator::perf_instr_decode()
 		return;
 	}
 
-	std::string&&
-		ddest_name = get_reg_name_str(static_cast<LarFile::RegName>
-		(__instr_decoder.ddest_index())),
-		dsrc0_name = get_reg_name_str(static_cast<LarFile::RegName>
-		(__instr_decoder.dsrc0_index())),
-		dsrc1_name = get_reg_name_str(static_cast<LarFile::RegName>
-		(__instr_decoder.dsrc1_index()));
-	const std::string op_suffix = (!__instr_decoder.op_type()) ? "s" : "v";
+	//std::string&&
+	//	ddest_name = get_reg_name_str(static_cast<LarFile::RegName>
+	//	(__instr_decoder.ddest_index())),
+	//	dsrc0_name = get_reg_name_str(static_cast<LarFile::RegName>
+	//	(__instr_decoder.dsrc0_index())),
+	//	dsrc1_name = get_reg_name_str(static_cast<LarFile::RegName>
+	//	(__instr_decoder.dsrc1_index()));
+	//const std::string op_suffix = (!__instr_decoder.op_type()) ? "s" : "v";
 
-	switch (__instr_decoder.group())
-	{
-	case 0:
-		switch (static_cast<InstrDecoder::Iog0Oper>
-			(__instr_decoder.oper()))
-		{
-		case InstrDecoder::Iog0Oper::Add_ThreeRegs:
-			printout("add" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
-			break;
-		case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
-			printout("sub" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
-			break;
-		case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
-			printout("slt" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
-			break;
-		case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
-			printout("mul" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
-			break;
+	//switch (__instr_decoder.group())
+	//{
+	//case 0:
+	//	switch (static_cast<InstrDecoder::Iog0Oper>
+	//		(__instr_decoder.oper()))
+	//	{
+	//	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+	//		printout("add" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+	//		printout("sub" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+	//		printout("slt" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+	//		printout("mul" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+	//		break;
 
-		case InstrDecoder::Iog0Oper::Div_ThreeRegs:
-			printout("div" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
-			break;
-		case InstrDecoder::Iog0Oper::And_ThreeRegs:
-			printout("and" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
-			break;
-		case InstrDecoder::Iog0Oper::Orr_ThreeRegs:
-			printout("orr" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
-			break;
-		case InstrDecoder::Iog0Oper::Xor_ThreeRegs:
-			printout("xor" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
-			break;
+	//	case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+	//		printout("div" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::And_ThreeRegs:
+	//		printout("and" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::Orr_ThreeRegs:
+	//		printout("orr" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::Xor_ThreeRegs:
+	//		printout("xor" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+	//		break;
 
-		case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
-			printout("shl" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
-			break;
-		case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
-			printout("shr" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
-			break;
-		case InstrDecoder::Iog0Oper::Inv_TwoRegs:
-			printout("inv" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name), "\n");
-			break;
-		case InstrDecoder::Iog0Oper::Not_TwoRegs:
-			printout("not" + op_suffix, " ",
-				strappcom2(ddest_name, dsrc0_name), "\n");
-			break;
+	//	case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
+	//		printout("shl" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
+	//		printout("shr" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::Inv_TwoRegs:
+	//		printout("inv" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name), "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::Not_TwoRegs:
+	//		printout("not" + op_suffix, " ",
+	//			strappcom2(ddest_name, dsrc0_name), "\n");
+	//		break;
 
-		case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
-			printout("addi" + op_suffix, " ",
-				ddest_name, ", pc, ",
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
-			printout("addi" + op_suffix, " ",
-				ddest_name, ", ", dsrc0_name, ", ",
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog0Oper::SimSyscall_ThreeRegsOneSimm12:
-			printout("sim_syscall" + op_suffix, " ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		default:
-			printout("eek!\n");
-			break;
-		}
-		break;
-	case 1:
-		switch (static_cast<InstrDecoder::Iog1Oper>
-			(__instr_decoder.oper()))
-		{
-		case InstrDecoder::Iog1Oper::Btru_OneRegOneSimm20:
-			printout("btru ", ddest_name, ", ",
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog1Oper::Bfal_OneRegOneSimm20:
-			printout("bfal ", ddest_name, ", ",
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog1Oper::Jmp_OneReg:
-			printout("jmp ", ddest_name);
-			break;
-		default:
-			printout("eek!\n");
-			break;
-		}
-		break;
-	case 2:
-		switch (static_cast<InstrDecoder::Iog2Oper>
-			(__instr_decoder.oper()))
-		{
-		case InstrDecoder::Iog2Oper::LdU8_ThreeRegsOneSimm12:
-			printout("ldu8 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog2Oper::LdS8_ThreeRegsOneSimm12:
-			printout("lds8 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog2Oper::LdU16_ThreeRegsOneSimm12:
-			printout("ldu16 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog2Oper::LdS16_ThreeRegsOneSimm12:
-			printout("lds16 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
+	//	case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
+	//		printout("addi" + op_suffix, " ",
+	//			ddest_name, ", pc, ",
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
+	//		printout("addi" + op_suffix, " ",
+	//			ddest_name, ", ", dsrc0_name, ", ",
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog0Oper::SimSyscall_ThreeRegsOneSimm12:
+	//		printout("sim_syscall" + op_suffix, " ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	default:
+	//		printout("eek!\n");
+	//		break;
+	//	}
+	//	break;
+	//case 1:
+	//	switch (static_cast<InstrDecoder::Iog1Oper>
+	//		(__instr_decoder.oper()))
+	//	{
+	//	case InstrDecoder::Iog1Oper::Btru_OneRegOneSimm20:
+	//		printout("btru ", ddest_name, ", ",
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog1Oper::Bfal_OneRegOneSimm20:
+	//		printout("bfal ", ddest_name, ", ",
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog1Oper::Jmp_OneReg:
+	//		printout("jmp ", ddest_name);
+	//		break;
+	//	default:
+	//		printout("eek!\n");
+	//		break;
+	//	}
+	//	break;
+	//case 2:
+	//	switch (static_cast<InstrDecoder::Iog2Oper>
+	//		(__instr_decoder.oper()))
+	//	{
+	//	case InstrDecoder::Iog2Oper::LdU8_ThreeRegsOneSimm12:
+	//		printout("ldu8 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog2Oper::LdS8_ThreeRegsOneSimm12:
+	//		printout("lds8 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog2Oper::LdU16_ThreeRegsOneSimm12:
+	//		printout("ldu16 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog2Oper::LdS16_ThreeRegsOneSimm12:
+	//		printout("lds16 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
 
-		case InstrDecoder::Iog2Oper::LdU32_ThreeRegsOneSimm12:
-			printout("ldu32 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog2Oper::LdS32_ThreeRegsOneSimm12:
-			printout("lds32 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog2Oper::LdU64_ThreeRegsOneSimm12:
-			printout("ldu64 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog2Oper::LdS64_ThreeRegsOneSimm12:
-			printout("lds64 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
+	//	case InstrDecoder::Iog2Oper::LdU32_ThreeRegsOneSimm12:
+	//		printout("ldu32 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog2Oper::LdS32_ThreeRegsOneSimm12:
+	//		printout("lds32 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog2Oper::LdU64_ThreeRegsOneSimm12:
+	//		printout("ldu64 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog2Oper::LdS64_ThreeRegsOneSimm12:
+	//		printout("lds64 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
 
-		case InstrDecoder::Iog2Oper::LdF16_ThreeRegsOneSimm12:
-			printout("ldf16 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		default:
-			printout("eek!\n");
-			break;
-		}
-		break;
-	case 3:
-		switch (static_cast<InstrDecoder::Iog3Oper>
-			(__instr_decoder.oper()))
-		{
-		case InstrDecoder::Iog3Oper::StU8_ThreeRegsOneSimm12:
-			printout("stu8 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog3Oper::StS8_ThreeRegsOneSimm12:
-			printout("sts8 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog3Oper::StU16_ThreeRegsOneSimm12:
-			printout("stu16 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog3Oper::StS16_ThreeRegsOneSimm12:
-			printout("sts16 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
+	//	case InstrDecoder::Iog2Oper::LdF16_ThreeRegsOneSimm12:
+	//		printout("ldf16 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	default:
+	//		printout("eek!\n");
+	//		break;
+	//	}
+	//	break;
+	//case 3:
+	//	switch (static_cast<InstrDecoder::Iog3Oper>
+	//		(__instr_decoder.oper()))
+	//	{
+	//	case InstrDecoder::Iog3Oper::StU8_ThreeRegsOneSimm12:
+	//		printout("stu8 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog3Oper::StS8_ThreeRegsOneSimm12:
+	//		printout("sts8 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog3Oper::StU16_ThreeRegsOneSimm12:
+	//		printout("stu16 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog3Oper::StS16_ThreeRegsOneSimm12:
+	//		printout("sts16 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
 
-		case InstrDecoder::Iog3Oper::StU32_ThreeRegsOneSimm12:
-			printout("stu32 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog3Oper::StS32_ThreeRegsOneSimm12:
-			printout("sts32 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog3Oper::StU64_ThreeRegsOneSimm12:
-			printout("stu64 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		case InstrDecoder::Iog3Oper::StS64_ThreeRegsOneSimm12:
-			printout("sts64 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
+	//	case InstrDecoder::Iog3Oper::StU32_ThreeRegsOneSimm12:
+	//		printout("stu32 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog3Oper::StS32_ThreeRegsOneSimm12:
+	//		printout("sts32 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog3Oper::StU64_ThreeRegsOneSimm12:
+	//		printout("stu64 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	case InstrDecoder::Iog3Oper::StS64_ThreeRegsOneSimm12:
+	//		printout("sts64 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
 
-		case InstrDecoder::Iog3Oper::StF16_ThreeRegsOneSimm12:
-			printout("stf16 ",
-				strappcom(ddest_name, dsrc0_name, dsrc1_name),
-				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
-			break;
-		default:
-			printout("eek!\n");
-			break;
-		}
-		break;
-	default:
-		break;
-	}
+	//	case InstrDecoder::Iog3Oper::StF16_ThreeRegsOneSimm12:
+	//		printout("stf16 ",
+	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
+	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//		break;
+	//	default:
+	//		printout("eek!\n");
+	//		break;
+	//	}
+	//	break;
+	//default:
+	//	break;
+	//}
 }
 
 bool Simulator::perf_instr_exec()
