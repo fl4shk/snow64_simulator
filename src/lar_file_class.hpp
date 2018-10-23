@@ -141,6 +141,46 @@ public:		// classes
 			// This should never occur!
 			return 9001;
 		}
+		inline s64 sgn_scalar_data() const
+		{
+			switch (metadata->type_size)
+			{
+			case TypeSize::Sz8:
+				return static_cast<s64>(static_cast<s8>(shareddata->data
+					.get_8(metadata->data_offset)));
+			case TypeSize::Sz16:
+				return static_cast<s64>(static_cast<s16>(shareddata->data
+					.get_16(metadata->data_offset)));
+			case TypeSize::Sz32:
+				return static_cast<s64>(static_cast<s32>(shareddata->data
+					.get_32(metadata->data_offset)));
+			case TypeSize::Sz64:
+				return static_cast<s64>(static_cast<s64>(shareddata->data
+					.get_64(metadata->data_offset)));
+			}
+
+			// This should never occur!
+			return 9001;
+		}
+
+		//inline void set_scalar_data(u64 n_scalar_data)
+		//{
+		//	switch (metadata->type_size)
+		//	{
+		//	case TypeSize::Sz8:
+		//		shareddata->data.set_8(metadata->data_offset,
+		//			n_scalar_data);
+		//	case TypeSize::Sz16:
+		//		shareddata->data.set_16(metadata->data_offset,
+		//			n_scalar_data);
+		//	case TypeSize::Sz32:
+		//		shareddata->data.set_32(metadata->data_offset,
+		//			n_scalar_data);
+		//	case TypeSize::Sz64:
+		//		shareddata->data.set_64(metadata->data_offset,
+		//			n_scalar_data);
+		//	}
+		//}
 	};
 
 
@@ -173,16 +213,16 @@ public:		// functions
 	}
 	
 
-	inline void write_arithlog_results(const RefLarContents& ddest_contents,
-		const BasicWord& n_data)
-	{
-		if (ddest_contents.metadata->tag != 0)
-		{
-			// Oh yeah, this marks us as dirty!
-			ddest_contents.shareddata->dirty = true;
-			ddest_contents.shareddata->data = n_data;
-		}
-	}
+	//inline void write_arithlog_results(const RefLarContents& ddest_contents,
+	//	const BasicWord& n_data)
+	//{
+	//	if (ddest_contents.metadata->tag != 0)
+	//	{
+	//		// Oh yeah, this marks us as dirty!
+	//		ddest_contents.shareddata->dirty = true;
+	//		ddest_contents.shareddata->data = n_data;
+	//	}
+	//}
 
 	void perf_ldst(bool is_store, size_t ddest_index, Address eff_addr,
 		DataType n_data_type, TypeSize n_type_size,

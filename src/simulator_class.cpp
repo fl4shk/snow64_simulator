@@ -452,10 +452,25 @@ bool Simulator::perf_instr_exec()
 	switch (__instr_decoder.group())
 	{
 	case 0:
-		//switch (static_cast<InstrDecoder::Iog0Oper>
-		//	(__instr_decoder.oper()))
-		//{
-		//}
+		switch (static_cast<InstrDecoder::Iog0Oper>
+			(__instr_decoder.oper()))
+		{
+		case InstrDecoder::Iog0Oper::SimSyscall_ThreeRegsOneSimm12:
+			handle_sim_syscall();
+			break;
+
+		default:
+			switch (__instr_decoder.op_type())
+			{
+			case false:
+				perf_group_0_scalar_op();
+				break;
+			case true:
+				perf_group_0_vector_op();
+				break;
+			}
+			break;
+		}
 		break;
 
 	case 1:
@@ -601,6 +616,354 @@ bool Simulator::perf_instr_exec()
 		break;
 	}
 	return true;
+}
+
+void Simulator::handle_sim_syscall()
+{
+	const LarFile::RegName ddest_index_reg_name
+		= static_cast<LarFile::RegName>(__instr_decoder.ddest_index());
+	switch (static_cast<SyscallType>(__instr_decoder.signext_imm()))
+	{
+	case SyscallType::DispRegs:
+		printout(get_reg_name_str(ddest_index_reg_name),
+			" all stuff:  \n");
+		break;
+	case SyscallType::DispDdestVectorData:
+		printout(get_reg_name_str(ddest_index_reg_name),
+			" vector data:  ",
+			std::hex, __curr_ddest_contents.shareddata->data, std::dec,
+			"\n");
+		break;
+	case SyscallType::DispDdestScalarData:
+		printout(get_reg_name_str(ddest_index_reg_name),
+			" scalar data:  ",
+			std::hex, __curr_ddest_contents.scalar_data(), std::dec,
+			"\n");
+		break;
+	case SyscallType::DispDdestAddr:
+		printout(get_reg_name_str(ddest_index_reg_name),
+			" full address:  ",
+			std::hex, __curr_ddest_contents.full_address(), std::dec,
+			"\n");
+		break;
+	case SyscallType::Finish:
+		printout("Finishing.");
+		exit(0);
+		break;
+	}
+}
+
+void Simulator::perf_group_0_scalar_op()
+{
+	switch (__curr_ddest_contents.metadata->data_type)
+	{
+	case LarFile::DataType::UnsgnInt:
+		switch (__curr_ddest_contents.metadata->type_size)
+		{
+		case LarFile::TypeSize::Sz8:
+			inner_perf_group_0_scalar_op<u8>();
+			break;
+		case LarFile::TypeSize::Sz16:
+			inner_perf_group_0_scalar_op<u16>();
+			break;
+		case LarFile::TypeSize::Sz32:
+			inner_perf_group_0_scalar_op<u32>();
+			break;
+		case LarFile::TypeSize::Sz64:
+			inner_perf_group_0_scalar_op<u64>();
+			break;
+		}
+		break;
+	case LarFile::DataType::SgnInt:
+		switch (__curr_ddest_contents.metadata->type_size)
+		{
+		case LarFile::TypeSize::Sz8:
+			inner_perf_group_0_scalar_op<s8>();
+			break;
+		case LarFile::TypeSize::Sz16:
+			inner_perf_group_0_scalar_op<s16>();
+			break;
+		case LarFile::TypeSize::Sz32:
+			inner_perf_group_0_scalar_op<s32>();
+			break;
+		case LarFile::TypeSize::Sz64:
+			inner_perf_group_0_scalar_op<s64>();
+			break;
+		}
+		break;
+	case LarFile::DataType::BFloat16:
+		inner_perf_group_0_scalar_op<BFloat16>();
+		break;
+	}
+}
+
+void Simulator::perf_group_0_vector_op()
+{
+}
+
+template<typename DdestType>
+void Simulator::inner_perf_group_0_scalar_op()
+{
+	const auto old_rounding_mode = fegetround();
+	fesetround(FE_TOWARDZERO);
+
+	__curr_ddest_contents.shareddata->dirty = true;
+	auto& curr_data = __curr_ddest_contents.shareddata->data;
+
+
+	DdestType temp_ddest, temp_dsrc0, temp_dsrc1;
+
+	if constexpr (std::is_integral<DdestType>())
+	{
+		temp_ddest = 0;
+		auto get_temp_dsrc
+			= [&](const LarFile::RefLarContents& curr_dsrc_contents)
+			-> DdestType
+		{
+			switch (curr_dsrc_contents.metadata->data_type)
+			{
+			case LarFile::DataType::UnsgnInt:
+				return static_cast<DdestType>(curr_dsrc_contents
+					.scalar_data());
+			case LarFile::DataType::SgnInt:
+				return static_cast<DdestType>(curr_dsrc_contents
+					.sgn_scalar_data());
+			//case LarFile::DataType::BFloat16:
+			default:
+				return BFloat16(static_cast<s16>(curr_dsrc_contents
+					.scalar_data())).cast_to_int<DdestType>();
+			}
+		};
+
+		temp_dsrc0 = get_temp_dsrc(__curr_dsrc0_contents);
+		temp_dsrc1 = get_temp_dsrc(__curr_dsrc1_contents);
+	}
+	else if constexpr (std::is_same<DdestType, BFloat16>())
+	{
+		temp_ddest = BFloat16();
+		auto get_temp_dsrc
+			= [&](const LarFile::RefLarContents& curr_dsrc_contents)
+			-> DdestType
+		{
+			switch (curr_dsrc_contents.metadata->data_type)
+			{
+			case LarFile::DataType::UnsgnInt:
+				return BFloat16::create_from_int(curr_dsrc_contents
+					.scalar_data());
+			case LarFile::DataType::SgnInt:
+				return BFloat16::create_from_int(curr_dsrc_contents
+					.sgn_scalar_data());
+			//case LarFile::DataType::BFloat16:
+			default:
+				return BFloat16(curr_dsrc_contents.scalar_data());
+			}
+		};
+
+		temp_dsrc0 = get_temp_dsrc(__curr_dsrc0_contents);
+		temp_dsrc1 = get_temp_dsrc(__curr_dsrc1_contents);
+	}
+
+
+	switch (static_cast<InstrDecoder::Iog0Oper>
+		(__instr_decoder.oper()))
+	{
+	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16(float(temp_dsrc0) + float(temp_dsrc1));
+		}
+		else
+		{
+			temp_ddest = temp_dsrc0 + temp_dsrc1;
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16(float(temp_dsrc0) - float(temp_dsrc1));
+		}
+		else
+		{
+			temp_ddest = temp_dsrc0 - temp_dsrc1;
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16(float(temp_dsrc0
+				< temp_dsrc1));
+		}
+		else
+		{
+			temp_ddest = temp_dsrc0 < temp_dsrc1;
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16(float(temp_dsrc0) * float(temp_dsrc1));
+		}
+		else
+		{
+			temp_ddest = temp_dsrc0 * temp_dsrc1;
+		}
+		break;
+
+	case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16(float(temp_dsrc0) / float(temp_dsrc1));
+		}
+		else
+		{
+			temp_ddest = temp_dsrc0 / temp_dsrc1;
+		}
+		break;
+	case InstrDecoder::Iog0Oper::And_ThreeRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16();
+		}
+		else
+		{
+			temp_ddest = temp_dsrc0 & temp_dsrc1;
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Orr_ThreeRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16();
+		}
+		else
+		{
+			temp_ddest = temp_dsrc0 | temp_dsrc1;
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Xor_ThreeRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16();
+		}
+		else
+		{
+			temp_ddest = temp_dsrc0 ^ temp_dsrc1;
+		}
+		break;
+
+	case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16();
+		}
+		else
+		{
+			temp_ddest = temp_dsrc0 << temp_dsrc1;
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16();
+		}
+		else
+		{
+			// This might not be a perfect match to what the hardware
+			// actually does?
+			temp_ddest = temp_dsrc0 >> static_cast<u64>(temp_dsrc1);
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Inv_TwoRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16();
+		}
+		else
+		{
+			temp_ddest = ~temp_dsrc0;
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Not_TwoRegs:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			temp_ddest = BFloat16();
+		}
+		else
+		{
+			temp_ddest = !temp_dsrc0;
+		}
+		break;
+
+	case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			//temp_ddest = BFloat16::create_from_int(__pc
+			//	- sizeof(InstrDecoder::Instr))
+			//	+ BFloat16::create_from_int(__instr_decoder.signext_imm());
+			temp_ddest = BFloat16
+				(float(BFloat16(__pc - sizeof(InstrDecoder::Instr)))
+				+ float(BFloat16::create_from_int(__instr_decoder
+				.signext_imm())));
+		}
+		else
+		{
+			temp_ddest = static_cast<DdestType>
+				(__pc - sizeof(InstrDecoder::Instr))
+				+ static_cast<DdestType>(__instr_decoder.signext_imm());
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
+		if constexpr (std::is_same<DdestType, BFloat16>())
+		{
+			//temp_ddest = temp_dsrc0
+			//	+ BFloat16::create_from_int(__instr_decoder.signext_imm());
+			temp_ddest = BFloat16(float(temp_dsrc0)
+				+ float(BFloat16::create_from_int(__instr_decoder
+				.signext_imm())));
+		}
+		else
+		{
+			temp_ddest = temp_dsrc0
+				+ static_cast<DdestType>(__instr_decoder.signext_imm());
+		}
+		break;
+	default:
+		break;
+	}
+
+	if constexpr (std::is_same<DdestType, BFloat16>())
+	{
+		curr_data.set_16(__curr_ddest_contents.metadata->data_offset,
+			temp_ddest.data());
+	}
+	else
+	{
+		if constexpr (std::is_same<DdestType, u8>()
+			|| std::is_same<DdestType, s8>())
+		{
+			curr_data.set_8(__curr_ddest_contents.metadata->data_offset,
+				temp_ddest);
+		}
+		else if constexpr (std::is_same<DdestType, u16>()
+			|| std::is_same<DdestType, s16>())
+		{
+			curr_data.set_16(__curr_ddest_contents.metadata->data_offset,
+				temp_ddest);
+		}
+		else if constexpr (std::is_same<DdestType, u32>()
+			|| std::is_same<DdestType, s32>())
+		{
+			curr_data.set_32(__curr_ddest_contents.metadata->data_offset,
+				temp_ddest);
+		}
+		else if constexpr (std::is_same<DdestType, u64>()
+			|| std::is_same<DdestType, s64>())
+		{
+			curr_data.set_64(__curr_ddest_contents.metadata->data_offset,
+				temp_ddest);
+		}
+	}
+
+	fesetround(old_rounding_mode);
 }
 
 std::string Simulator::get_reg_name_str(LarFile::RegName some_reg_name)

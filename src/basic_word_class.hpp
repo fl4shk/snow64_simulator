@@ -163,5 +163,14 @@ inline Address convert_addr_to_bw_instr_index(Address to_convert)
 
 } // namespace snow64_simulator
 
+inline std::ostream& operator << (std::ostream& os,
+	const snow64_simulator::BasicWord& to_show)
+{
+	for (s64 i=to_show.NUM_DATA_ELEMS-1; i>=0; --i)
+	{
+		osprintout(os, static_cast<u32>(to_show.data[i]));
+	}
+	return os;
+}
 
 #endif		// src__slash__basic_word_class_hpp

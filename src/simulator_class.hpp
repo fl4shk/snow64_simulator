@@ -67,6 +67,16 @@ private:		// functions
 	void perf_instr_decode();
 	bool perf_instr_exec();
 
+	void handle_sim_syscall();
+	void perf_group_0_scalar_op();
+	void perf_group_0_vector_op();
+
+	template<typename DdestType>
+	void inner_perf_group_0_scalar_op();
+
+	template<typename DdestType>
+	void inner_perf_group_0_vector_op();
+
 	std::string get_reg_name_str(LarFile::RegName some_reg_name) const;
 };
 
