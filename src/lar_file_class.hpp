@@ -262,12 +262,12 @@ private:		// functions
 	inline void load_from_mem(BasicWord& ret, Address base_addr,
 		std::unique_ptr<BasicWord[]>& mem)
 	{
-		ret = mem[convert_addr_to_bw_addr(base_addr)];
+		ret = mem[base_addr];
 	}
 	inline void store_to_mem(const BasicWord& to_store, Address base_addr,
 		std::unique_ptr<BasicWord[]>& mem)
 	{
-		mem[convert_addr_to_bw_addr(base_addr)] = to_store;
+		mem[base_addr] = to_store;
 	}
 };
 

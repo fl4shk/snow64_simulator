@@ -167,6 +167,7 @@ inline std::ostream& operator << (std::ostream& os,
 	const snow64_simulator::BasicWord& to_show)
 {
 	for (s64 i=to_show.NUM_DATA_ELEMS-1; i>=0; --i)
+	//for (size_t i=0; i<to_show.NUM_DATA_ELEMS; ++i)
 	{
 		osprintout(os, static_cast<u32>(to_show.data[i]));
 	}

@@ -21,6 +21,10 @@ void LarFile::perf_ldst(bool is_store, size_t ddest_index,
 	Address eff_addr, DataType n_data_type, TypeSize n_type_size,
 	std::unique_ptr<BasicWord[]>& mem, size_t mem_amount_in_words)
 {
+	//printout("LarFile::perf_ldst() stuff:  ",
+	//	std::hex, eff_addr, " ",
+	//	mem[convert_addr_to_bw_addr(eff_addr)], std::dec,
+	//	"\n");
 	if (ddest_index == 0)
 	{
 		return;
@@ -73,6 +77,13 @@ void LarFile::perf_ldst(bool is_store, size_t ddest_index,
 		break;
 	}
 
+	//auto& ddest_shareddata = __lar_shareddata[ddest_metadata.tag];
+	//printout("LarFile::perf_ldst() results:  ",
+	//	std::hex, ddest_shareddata.data, " ",
+	//	ddest_shareddata.base_addr, std::dec, " ",
+
+	//	std::hex, mem[ddest_shareddata.base_addr], std::dec,
+	//	"\n");
 }
 
 
@@ -80,10 +91,13 @@ void LarFile::handle_ldst_hit(bool is_store, LarMetadata& ddest_metadata,
 	Address n_base_addr, Address n_data_offset,
 	std::unique_ptr<BasicWord[]>& mem, u8 tag_search)
 {
+	//printout("LarFile::handle_ldst_hit()\n");
+
 	if (ddest_metadata.tag == tag_search)
 	{
 		return;
 	}
+	//printout("our tag is not the one we were looking for.\n");
 
 	const auto old_tag = ddest_metadata.tag;
 
@@ -151,6 +165,10 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 	auto& curr_shareddata = __lar_shareddata[old_metadata.tag];
 	const auto old_base_addr = curr_shareddata.base_addr;
 
+	//printout("LarFile::handle_ldst_miss():  ",
+	//	static_cast<u32>(curr_shareddata.ref_count),
+	//	"\n");
+
 	switch (curr_shareddata.ref_count)
 	{
 	// This is from before we were allocated.
@@ -158,6 +176,8 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 		{
 			// Allocate a new element of shared data.
 			ddest_metadata.tag = alloc_tag();
+			//printout("ddest_metadata.tag:  ",
+			//	static_cast<u32>(ddest_metadata.tag), "\n");
 			auto& n_shareddata = __lar_shareddata[ddest_metadata.tag];
 			n_shareddata.base_addr = n_base_addr;
 			n_shareddata.ref_count = 1;

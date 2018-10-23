@@ -67,7 +67,7 @@ private:		// functions
 	void perf_instr_decode();
 	bool perf_instr_exec();
 
-	void handle_sim_syscall();
+	bool handle_sim_syscall();
 	void perf_group_0_scalar_op();
 	void perf_group_0_vector_op();
 

@@ -154,6 +154,7 @@ int Simulator::run()
 
 	for (;;)
 	{
+		printout(std::hex, __pc, std::dec, ":  ");
 		perf_instr_fetch();
 		perf_instr_decode();
 
@@ -162,7 +163,7 @@ int Simulator::run()
 			break;
 		}
 
-		if (__pc > 8)
+		if (__pc > 0x200)
 		{
 			break;
 		}
@@ -456,7 +457,7 @@ bool Simulator::perf_instr_exec()
 			(__instr_decoder.oper()))
 		{
 		case InstrDecoder::Iog0Oper::SimSyscall_ThreeRegsOneSimm12:
-			handle_sim_syscall();
+			return handle_sim_syscall();
 			break;
 
 		default:
@@ -618,7 +619,7 @@ bool Simulator::perf_instr_exec()
 	return true;
 }
 
-void Simulator::handle_sim_syscall()
+bool Simulator::handle_sim_syscall()
 {
 	const LarFile::RegName ddest_index_reg_name
 		= static_cast<LarFile::RegName>(__instr_decoder.ddest_index());
@@ -647,10 +648,13 @@ void Simulator::handle_sim_syscall()
 			"\n");
 		break;
 	case SyscallType::Finish:
-		printout("Finishing.");
-		exit(0);
+		printout("Finishing.\n");
+		//exit(0);
+		return true;
 		break;
 	}
+
+	return false;
 }
 
 void Simulator::perf_group_0_scalar_op()
