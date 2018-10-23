@@ -4,7 +4,9 @@
 // src/simulator_class.hpp
 
 #include "misc_includes.hpp"
-#include "basic_word_class.hpp"
+#include "lar_file_class.hpp"
+#include "instr_decoder_class.hpp"
+#include "bfloat16_class.hpp"
 
 namespace snow64_simulator
 {
@@ -23,14 +25,25 @@ public:		// enums
 		Finish,
 	};
 
-public:		// classes
 
 private:		// variables
+	LarFile __lar_file;
+	InstrDecoder __instr_decoder;
+	Address __pc = 0;
+
+	LarFile::RefLarContents __curr_ddest_contents, __curr_dsrc0_contents,
+		__curr_dsrc1_contents;
+
+
+
+	InstrDecoder::Instr __curr_instr = 0;
+
 	std::string __data_filename;
 
-	size_t __mem_amount_in_bytes, __mem_amount_in_words;
+	size_t __mem_amount_in_bytes = 0, __mem_amount_in_words = 0;
 
 	std::unique_ptr<BasicWord[]> __mem;
+
 
 public:		// functions
 	Simulator(const std::string& s_data_filename,
@@ -47,6 +60,14 @@ private:		// functions
 		printerr("Error:  ", msg, "\n");
 		exit(1);
 	}
+
+
+	// Standard fetch->decode->execute loop.
+	void perf_instr_fetch();
+	void perf_instr_decode();
+	bool perf_instr_exec();
+
+	std::string get_reg_name_str(LarFile::RegName some_reg_name) const;
 };
 
 } // namespace snow64_simulator

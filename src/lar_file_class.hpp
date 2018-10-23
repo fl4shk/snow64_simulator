@@ -22,7 +22,7 @@ public:		// enums and typedefs
 		//Reserved
 	};
 
-	enum class IntTypeSize : u8
+	enum class TypeSize : u8
 	{
 		Sz8,
 		Sz16,
@@ -67,7 +67,7 @@ public:		// classes
 		u8 tag = 0;
 		u8 data_offset = 0;
 		DataType data_type = DataType::UnsgnInt;
-		IntTypeSize int_type_size = IntTypeSize::Sz8;
+		TypeSize type_size = TypeSize::Sz8;
 
 	public:		// functions
 		inline LarMetadata()
@@ -115,6 +115,32 @@ public:		// classes
 
 		inline RefLarContents& operator = (const RefLarContents& to_copy)
 			= default;
+
+		inline Address full_address() const
+		{
+			Address ret = 0;
+			ret |= (shareddata->base_addr << WIDTH__METADATA_DATA_OFFSET);
+			ret |= metadata->data_offset;
+			return ret;
+		}
+
+		inline u64 scalar_data() const
+		{
+			switch (metadata->type_size)
+			{
+			case TypeSize::Sz8:
+				return shareddata->data.get_8(metadata->data_offset);
+			case TypeSize::Sz16:
+				return shareddata->data.get_16(metadata->data_offset);
+			case TypeSize::Sz32:
+				return shareddata->data.get_32(metadata->data_offset);
+			case TypeSize::Sz64:
+				return shareddata->data.get_64(metadata->data_offset);
+			}
+
+			// This should never occur!
+			return 9001;
+		}
 	};
 
 
@@ -159,7 +185,7 @@ public:		// functions
 	}
 
 	void perf_ldst(bool is_store, size_t ddest_index, Address eff_addr,
-		DataType n_data_type, IntTypeSize n_int_type_size,
+		DataType n_data_type, TypeSize n_type_size,
 		std::unique_ptr<BasicWord[]>& mem, size_t mem_amount_in_words);
 
 

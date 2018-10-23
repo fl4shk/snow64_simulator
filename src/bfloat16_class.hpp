@@ -287,8 +287,8 @@ public:		// functions
 			{
 				ret = 0;
 				set_bits_with_range(ret, 1,
-					width_to_msb_pos(width_of_type(ret)),
-					width_to_msb_pos(width_of_type(ret)));
+					WIDTH2MP(width_of_type(ret)),
+					WIDTH2MP(width_of_type(ret)));
 			};
 
 			//osprintout(os, "outer else:  curr_exp, ",
@@ -303,15 +303,15 @@ public:		// functions
 				//	"\n");
 
 				//const bool sticky = get_bits_with_range(ret,
-				//	width_to_msb_pos(width_of_type(ret)),
-				//	(width_to_msb_pos(width_of_type(ret)) 
+				//	WIDTH2MP(width_of_type(ret)),
+				//	(WIDTH2MP(width_of_type(ret)) 
 				//	- abs_curr_exp))
 				//	|| ((abs_curr_exp 
-				//	== width_to_msb_pos(width_of_type(ret)))
+				//	== WIDTH2MP(width_of_type(ret)))
 				//	&& ret);
 				const bool sticky = get_bits_with_range(ret,
-					width_to_msb_pos(width_of_type(ret)),
-					(width_to_msb_pos(width_of_type(ret))
+					WIDTH2MP(width_of_type(ret)),
+					(WIDTH2MP(width_of_type(ret))
 					- abs_curr_exp));
 
 

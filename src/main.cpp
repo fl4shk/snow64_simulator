@@ -1,13 +1,12 @@
 #include "simulator_class.hpp"
-//#include "bfloat16_class.hpp"
+#include "bfloat16_class.hpp"
 #include <fenv.h>
 
-void test_float_vectorization();
+//void test_float_vectorization();
+//void test_bfloat16_stuff_with_vectorization();
 
 int main(int argc, char** argv)
 {
-	fesetround(FE_TOWARDZERO);
-
 	if (argc != 3)
 	{
 		printerr("Usage:  ", argv[0], " data_filename"
@@ -19,6 +18,8 @@ int main(int argc, char** argv)
 		convert_str_to<size_t>(argv[2]));
 
 	return sim.run();
+
+	//test_bfloat16_stuff_with_vectorization();
 }
 
 
@@ -112,6 +113,78 @@ int main(int argc, char** argv)
 //			printout("Oh no!\n");
 //		}
 //	}
+//
+//	fesetround(old_rounding_mode);
+//}
+
+
+//void test_bfloat16_stuff_with_vectorization()
+//{
+//	const int old_rounding_mode = fegetround();
+//	fesetround(FE_TOWARDZERO);
+//
+//	static constexpr size_t ARR_SIZE__TEST_VECTORIZED_FLOAT = 16;
+//
+//	//#define OP +
+//	//#define OP -
+//	//#define OP *
+//	//#define OP /
+//	#define OP <
+//
+//	std::array<BFloat16, ARR_SIZE__TEST_VECTORIZED_FLOAT>
+//		arr_b_bfloat16, results_bfloat16;
+//	std::array<float, ARR_SIZE__TEST_VECTORIZED_FLOAT>
+//		arr_b_float, results_float;
+//
+//	std::array<bool, ARR_SIZE__TEST_VECTORIZED_FLOAT>
+//		results_slt_bfloat16, results_slt_float;
+//
+//	for (size_t i=0; i<BFloat16::num_bfloat16s; ++i)
+//	{
+//		const BFloat16 a_bfloat16(static_cast<u16>(i));
+//		const float a_float = static_cast<float>(a_bfloat16);
+//
+//		for (size_t j=0;
+//			j<BFloat16::num_bfloat16s;
+//			j+=results_bfloat16.size())
+//		{
+//			for (size_t k=0; k<results_bfloat16.size(); ++k)
+//			{
+//				arr_b_bfloat16[k] = BFloat16(static_cast<u16>(j + k));
+//			}
+//
+//			for (size_t k=0; k<results_bfloat16.size(); ++k)
+//			{
+//				arr_b_float[k] = static_cast<float>(arr_b_bfloat16[k]);
+//			}
+//
+//			for (size_t k=0; k<results_bfloat16.size(); ++k)
+//			{
+//				//results_bfloat16[k] = a_bfloat16 OP arr_b_bfloat16[k];
+//				results_slt_bfloat16[k] = a_bfloat16 OP arr_b_bfloat16[k];
+//			}
+//
+//			for (size_t k=0; k<results_bfloat16.size(); ++k)
+//			{
+//				//results_float[k] = a_float OP arr_b_float[k];
+//				results_slt_float[k] = a_float OP arr_b_float[k];
+//			}
+//
+//			for (size_t k=0; k<results_bfloat16.size(); ++k)
+//			{
+//				//const BFloat16 temp(results_float[k]);
+//				//if (results_bfloat16[k] != temp)
+//				if (results_slt_bfloat16[k] != results_slt_float[k])
+//				{
+//					printerr("test_bfloat16_stuff_with_vectorization():  ",
+//						"Error with ", std::hex, i, " ", (j + k), std::dec,
+//						"!\n");
+//					//exit(1);
+//				}
+//			}
+//		}
+//	}
+//	#undef OP
 //
 //	fesetround(old_rounding_mode);
 //}

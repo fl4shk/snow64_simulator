@@ -17,8 +17,8 @@ LarFile::~LarFile()
 {
 }
 
-void LarFile::perf_ldst(bool is_store, size_t ddest_index, Address eff_addr,
-	DataType n_data_type, IntTypeSize n_int_type_size,
+void LarFile::perf_ldst(bool is_store, size_t ddest_index,
+	Address eff_addr, DataType n_data_type, TypeSize n_type_size,
 	std::unique_ptr<BasicWord[]>& mem, size_t mem_amount_in_words)
 {
 	if (ddest_index == 0)
@@ -58,7 +58,7 @@ void LarFile::perf_ldst(bool is_store, size_t ddest_index, Address eff_addr,
 	auto& ddest_metadata = __lar_metadata[ddest_index];
 	ddest_metadata.data_offset = n_data_offset;
 	ddest_metadata.data_type = n_data_type;
-	ddest_metadata.int_type_size = n_int_type_size;
+	ddest_metadata.type_size = n_type_size;
 
 	switch (tag_search != 0)
 	{

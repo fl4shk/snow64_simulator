@@ -10,8 +10,6 @@ Simulator::Simulator(const std::string& s_data_filename,
 	size_t s_min_mem_amount_in_bytes) : __data_filename(s_data_filename),
 	__mem_amount_in_bytes(s_min_mem_amount_in_bytes)
 {
-	fesetround(FE_TOWARDZERO);
-
 	__mem_amount_in_words = __mem_amount_in_bytes
 		/ sizeof(BasicWord);
 
@@ -86,7 +84,7 @@ Simulator::Simulator(const std::string& s_data_filename,
 				err(sconcat("Invalid line of initial memory contents."));
 			}
 
-			for (size_t i=0; i<BasicWord::num_data_elems; ++i)
+			for (size_t i=0; i<BasicWord::NUM_DATA_ELEMS; ++i)
 			{
 				u8& n_data = __mem[word_addr].data[i];
 				n_data = 0;
@@ -94,7 +92,7 @@ Simulator::Simulator(const std::string& s_data_filename,
 				for (size_t j=0; j<(sizeof(u8) * 2); ++j)
 				{
 					const size_t index
-						= ((BasicWord::num_data_elems - i - 1) * 2) + j;
+						= ((BasicWord::NUM_DATA_ELEMS - i - 1) * 2) + j;
 					n_data <<= 4;
 
 					if ((line.at(index) >= '0') && (line.at(index) <= '9'))
@@ -122,7 +120,7 @@ Simulator::Simulator(const std::string& s_data_filename,
 
 	//for (size_t i=0; i<mem_amount_in_words(); ++i)
 	//{
-	//	for (size_t j=0; j<BasicWord::num_data_elems; j+=4)
+	//	for (size_t j=0; j<BasicWord::NUM_DATA_ELEMS; j+=4)
 	//	{
 	//		//u32 temp = 0;
 	//		//set_bits_with_range(temp, __mem[i].data[j + 0], 31, 24);
@@ -136,7 +134,7 @@ Simulator::Simulator(const std::string& s_data_filename,
 	//			| (__mem[i].data[j + 3] << 24));
 	//		printout(std::hex, temp, std::dec, " ");
 	//	}
-	//	//for (size_t j=0; j<BasicWord::num_data_elems; ++j)
+	//	//for (size_t j=0; j<BasicWord::NUM_DATA_ELEMS; ++j)
 	//	//{
 	//	//	printout(std::hex, static_cast<u32>(__mem[i].data[j]),
 	//	//		std::dec, " ");
@@ -152,8 +150,501 @@ Simulator::~Simulator()
 
 int Simulator::run()
 {
+	//printout(BasicWord::NUM_DATA_ELEMS, "\n");
+
+	for (;;)
+	{
+		perf_instr_fetch();
+		perf_instr_decode();
+
+		if (!perf_instr_exec())
+		{
+			break;
+		}
+
+		if (__pc > 8)
+		{
+			break;
+		}
+	}
+
 	return 0;
 }
+
+void Simulator::perf_instr_fetch()
+{
+	const auto pc_as_bw_addr = convert_addr_to_bw_addr(__pc);
+	const auto pc_as_bw_instr_index = convert_addr_to_bw_instr_index(__pc);
+
+
+	if (get_bits_with_range(__pc, 1, 0) != 0)
+	{
+		err(sconcat("Program counter value ", std::hex, __pc, std::dec,
+			" not aligned to 32 bits!"));
+	}
+
+	if (pc_as_bw_addr >= mem_amount_in_words())
+	{
+		err(sconcat("Program counter value ", std::hex, __pc, std::dec,
+			" out of range for amount of allocated memory ",
+			"(", mem_amount_in_words(), "words)!"));
+	}
+
+
+	auto& line_of_instrs = __mem[pc_as_bw_addr];
+
+	__curr_instr = line_of_instrs.get_32(pc_as_bw_instr_index);
+	//printout("perf_instr_fetch() debug stuff:  ",
+	//	std::hex, __curr_instr, "; ", __pc, " ", pc_as_bw_addr, " ", 
+	//	pc_as_bw_instr_index, std::dec, "\n");
+	__pc += sizeof(InstrDecoder::Instr);
+}
+
+void Simulator::perf_instr_decode()
+{
+	__instr_decoder.decode(__curr_instr);
+
+	__lar_file.read_from(__instr_decoder.ddest_index(),
+		__instr_decoder.dsrc0_index(), __instr_decoder.dsrc1_index(),
+		__curr_ddest_contents, __curr_dsrc0_contents,
+		__curr_dsrc1_contents);
+
+
+	if (__instr_decoder.nop())
+	{
+		return;
+	}
+
+	std::string&&
+		ddest_name = get_reg_name_str(static_cast<LarFile::RegName>
+		(__instr_decoder.ddest_index())),
+		dsrc0_name = get_reg_name_str(static_cast<LarFile::RegName>
+		(__instr_decoder.dsrc0_index())),
+		dsrc1_name = get_reg_name_str(static_cast<LarFile::RegName>
+		(__instr_decoder.dsrc1_index()));
+	const std::string op_suffix = (!__instr_decoder.op_type()) ? "s" : "v";
+
+	switch (__instr_decoder.group())
+	{
+	case 0:
+		switch (static_cast<InstrDecoder::Iog0Oper>
+			(__instr_decoder.oper()))
+		{
+		case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+			printout("add" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+			break;
+		case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+			printout("sub" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+			break;
+		case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+			printout("slt" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+			break;
+		case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+			printout("mul" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+			break;
+
+		case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+			printout("div" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+			break;
+		case InstrDecoder::Iog0Oper::And_ThreeRegs:
+			printout("and" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+			break;
+		case InstrDecoder::Iog0Oper::Orr_ThreeRegs:
+			printout("orr" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+			break;
+		case InstrDecoder::Iog0Oper::Xor_ThreeRegs:
+			printout("xor" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+			break;
+
+		case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
+			printout("shl" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+			break;
+		case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
+			printout("shr" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name, dsrc1_name), "\n");
+			break;
+		case InstrDecoder::Iog0Oper::Inv_TwoRegs:
+			printout("inv" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name), "\n");
+			break;
+		case InstrDecoder::Iog0Oper::Not_TwoRegs:
+			printout("not" + op_suffix, " ",
+				strappcom2(ddest_name, dsrc0_name), "\n");
+			break;
+
+		case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
+			printout("addi" + op_suffix, " ",
+				ddest_name, ", pc, ",
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
+			printout("addi" + op_suffix, " ",
+				ddest_name, ", ", dsrc0_name, ", ",
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog0Oper::SimSyscall_ThreeRegsOneSimm12:
+			printout("sim_syscall" + op_suffix, " ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		default:
+			printout("eek!\n");
+			break;
+		}
+		break;
+	case 1:
+		switch (static_cast<InstrDecoder::Iog1Oper>
+			(__instr_decoder.oper()))
+		{
+		case InstrDecoder::Iog1Oper::Btru_OneRegOneSimm20:
+			printout("btru ", ddest_name, ", ",
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog1Oper::Bfal_OneRegOneSimm20:
+			printout("bfal ", ddest_name, ", ",
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog1Oper::Jmp_OneReg:
+			printout("jmp ", ddest_name);
+			break;
+		default:
+			printout("eek!\n");
+			break;
+		}
+		break;
+	case 2:
+		switch (static_cast<InstrDecoder::Iog2Oper>
+			(__instr_decoder.oper()))
+		{
+		case InstrDecoder::Iog2Oper::LdU8_ThreeRegsOneSimm12:
+			printout("ldu8 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog2Oper::LdS8_ThreeRegsOneSimm12:
+			printout("lds8 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog2Oper::LdU16_ThreeRegsOneSimm12:
+			printout("ldu16 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog2Oper::LdS16_ThreeRegsOneSimm12:
+			printout("lds16 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+
+		case InstrDecoder::Iog2Oper::LdU32_ThreeRegsOneSimm12:
+			printout("ldu32 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog2Oper::LdS32_ThreeRegsOneSimm12:
+			printout("lds32 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog2Oper::LdU64_ThreeRegsOneSimm12:
+			printout("ldu64 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog2Oper::LdS64_ThreeRegsOneSimm12:
+			printout("lds64 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+
+		case InstrDecoder::Iog2Oper::LdF16_ThreeRegsOneSimm12:
+			printout("ldf16 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		default:
+			printout("eek!\n");
+			break;
+		}
+		break;
+	case 3:
+		switch (static_cast<InstrDecoder::Iog3Oper>
+			(__instr_decoder.oper()))
+		{
+		case InstrDecoder::Iog3Oper::StU8_ThreeRegsOneSimm12:
+			printout("stu8 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog3Oper::StS8_ThreeRegsOneSimm12:
+			printout("sts8 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog3Oper::StU16_ThreeRegsOneSimm12:
+			printout("stu16 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog3Oper::StS16_ThreeRegsOneSimm12:
+			printout("sts16 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+
+		case InstrDecoder::Iog3Oper::StU32_ThreeRegsOneSimm12:
+			printout("stu32 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog3Oper::StS32_ThreeRegsOneSimm12:
+			printout("sts32 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog3Oper::StU64_ThreeRegsOneSimm12:
+			printout("stu64 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		case InstrDecoder::Iog3Oper::StS64_ThreeRegsOneSimm12:
+			printout("sts64 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+
+		case InstrDecoder::Iog3Oper::StF16_ThreeRegsOneSimm12:
+			printout("stf16 ",
+				strappcom(ddest_name, dsrc0_name, dsrc1_name),
+				std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+			break;
+		default:
+			printout("eek!\n");
+			break;
+		}
+		break;
+	default:
+		break;
+	}
+}
+
+bool Simulator::perf_instr_exec()
+{
+	//printout(__instr_decoder.ddest_index(), "\n");
+
+	if (__instr_decoder.nop())
+	{
+		err(sconcat("Invalid instruction at program counter",
+			std::hex, (__pc - sizeof(InstrDecoder::Instr)), std::dec,
+			"!"));
+	}
+
+	switch (__instr_decoder.group())
+	{
+	case 0:
+		//switch (static_cast<InstrDecoder::Iog0Oper>
+		//	(__instr_decoder.oper()))
+		//{
+		//}
+		break;
+
+	case 1:
+		switch (static_cast<InstrDecoder::Iog1Oper>
+			(__instr_decoder.oper()))
+		{
+		case InstrDecoder::Iog1Oper::Btru_OneRegOneSimm20:
+			if (__curr_ddest_contents.scalar_data() != 0)
+			{
+				__pc += __instr_decoder.signext_imm();
+			}
+			break;
+		case InstrDecoder::Iog1Oper::Bfal_OneRegOneSimm20:
+			if (__curr_ddest_contents.scalar_data() == 0)
+			{
+				__pc += __instr_decoder.signext_imm();
+			}
+			break;
+		case InstrDecoder::Iog1Oper::Jmp_OneReg:
+			__pc = __curr_ddest_contents.scalar_data();
+			break;
+		case InstrDecoder::Iog1Oper::Bad:
+			break;
+		}
+		break;
+
+	case 2:
+	case 3:
+		{
+			Address eff_addr = __curr_dsrc0_contents.full_address()
+				+ __instr_decoder.signext_imm();
+			//printout("ldst stuff:  ",
+			//	std::hex,
+			//	__curr_dsrc0_contents.full_address(), " ", 
+			//	__instr_decoder.signext_imm(), " ",
+			//	eff_addr, " ",
+			//	__curr_dsrc1_contents.scalar_data(),
+			//	std::dec, "\n");
+			//__curr_dsrc1_contents.scalar_data()
+			switch (__curr_dsrc1_contents.metadata->data_type)
+			{
+			case LarFile::DataType::UnsgnInt:
+				switch (__curr_dsrc1_contents.metadata->type_size)
+				{
+				case LarFile::TypeSize::Sz8:
+					eff_addr += static_cast<u64>(static_cast<u8>
+						(__curr_dsrc1_contents.scalar_data()));
+					break;
+				case LarFile::TypeSize::Sz16:
+					eff_addr += static_cast<u64>(static_cast<u16>
+						(__curr_dsrc1_contents.scalar_data()));
+					break;
+				case LarFile::TypeSize::Sz32:
+					eff_addr += static_cast<u64>(static_cast<u32>
+						(__curr_dsrc1_contents.scalar_data()));
+					break;
+				case LarFile::TypeSize::Sz64:
+					eff_addr += __curr_dsrc1_contents.scalar_data();
+					break;
+				}
+				break;
+			case LarFile::DataType::SgnInt:
+				switch (__curr_dsrc1_contents.metadata->type_size)
+				{
+				case LarFile::TypeSize::Sz8:
+					eff_addr += static_cast<s64>(static_cast<s8>
+						(__curr_dsrc1_contents.scalar_data()));
+					break;
+				case LarFile::TypeSize::Sz16:
+					eff_addr += static_cast<s64>(static_cast<s16>
+						(__curr_dsrc1_contents.scalar_data()));
+					break;
+				case LarFile::TypeSize::Sz32:
+					eff_addr += static_cast<s64>(static_cast<s32>
+						(__curr_dsrc1_contents.scalar_data()));
+					break;
+				case LarFile::TypeSize::Sz64:
+					eff_addr += __curr_dsrc1_contents.scalar_data();
+					break;
+				}
+				break;
+			case LarFile::DataType::BFloat16:
+				eff_addr += BFloat16(static_cast<u16>(__curr_dsrc1_contents
+					.scalar_data())).cast_to_int<s64>();
+				break;
+
+			}
+			//printout("ldst eff_addr:  ", std::hex, eff_addr, std::dec,
+			//	"\n");
+			LarFile::DataType n_data_type = LarFile::DataType::UnsgnInt;
+			LarFile::TypeSize n_type_size = LarFile::TypeSize::Sz8;
+
+			switch (static_cast<InstrDecoder::Iog2Oper>
+				(__instr_decoder.oper()))
+			{
+			case InstrDecoder::Iog2Oper::LdU8_ThreeRegsOneSimm12:
+				n_data_type = LarFile::DataType::UnsgnInt;
+				n_type_size = LarFile::TypeSize::Sz8;
+				break;
+			case InstrDecoder::Iog2Oper::LdS8_ThreeRegsOneSimm12:
+				n_data_type = LarFile::DataType::SgnInt;
+				n_type_size = LarFile::TypeSize::Sz8;
+				break;
+			case InstrDecoder::Iog2Oper::LdU16_ThreeRegsOneSimm12:
+				n_data_type = LarFile::DataType::UnsgnInt;
+				n_type_size = LarFile::TypeSize::Sz16;
+				break;
+			case InstrDecoder::Iog2Oper::LdS16_ThreeRegsOneSimm12:
+				n_data_type = LarFile::DataType::SgnInt;
+				n_type_size = LarFile::TypeSize::Sz16;
+				break;
+
+			case InstrDecoder::Iog2Oper::LdU32_ThreeRegsOneSimm12:
+				n_data_type = LarFile::DataType::UnsgnInt;
+				n_type_size = LarFile::TypeSize::Sz32;
+				break;
+			case InstrDecoder::Iog2Oper::LdS32_ThreeRegsOneSimm12:
+				n_data_type = LarFile::DataType::SgnInt;
+				n_type_size = LarFile::TypeSize::Sz32;
+				break;
+			case InstrDecoder::Iog2Oper::LdU64_ThreeRegsOneSimm12:
+				n_data_type = LarFile::DataType::UnsgnInt;
+				n_type_size = LarFile::TypeSize::Sz64;
+				break;
+			case InstrDecoder::Iog2Oper::LdS64_ThreeRegsOneSimm12:
+				n_data_type = LarFile::DataType::SgnInt;
+				n_type_size = LarFile::TypeSize::Sz64;
+				break;
+
+			case InstrDecoder::Iog2Oper::LdF16_ThreeRegsOneSimm12:
+				n_data_type = LarFile::DataType::BFloat16;
+				n_type_size = LarFile::TypeSize::Sz16;
+				break;
+
+			case InstrDecoder::Iog2Oper::Bad:
+				break;
+			}
+
+			__lar_file.perf_ldst((__instr_decoder.group() == 3),
+				__instr_decoder.ddest_index(), eff_addr, n_data_type,
+				n_type_size, __mem, mem_amount_in_words());
+		}
+		break;
+	}
+	return true;
+}
+
+std::string Simulator::get_reg_name_str(LarFile::RegName some_reg_name)
+	const
+{
+	switch (some_reg_name)
+	{
+	case LarFile::RegName::Dzero:
+		return "dzero";
+	case LarFile::RegName::Du0:
+		return "du0";
+	case LarFile::RegName::Du1:
+		return "du1";
+	case LarFile::RegName::Du2:
+		return "du2";
+	case LarFile::RegName::Du3:
+		return "du3";
+	case LarFile::RegName::Du4:
+		return "du4";
+	case LarFile::RegName::Du5:
+		return "du5";
+	case LarFile::RegName::Du6:
+		return "du6";
+	case LarFile::RegName::Du7:
+		return "du7";
+	case LarFile::RegName::Du8:
+		return "du8";
+	case LarFile::RegName::Du9:
+		return "du9";
+	case LarFile::RegName::Du10:
+		return "du10";
+	case LarFile::RegName::Du11:
+		return "du11";
+	case LarFile::RegName::Dlr:
+		return "dlr";
+	case LarFile::RegName::Dfp:
+		return "dfp";
+	case LarFile::RegName::Dsp:
+		return "dsp";
+	default:
+		return "eek!";
+	}
+}
+
 
 } // namespace snow64_simulator
 
