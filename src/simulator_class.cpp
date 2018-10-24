@@ -163,10 +163,10 @@ int Simulator::run()
 			break;
 		}
 
-		if (__pc > 0x200)
-		{
-			break;
-		}
+		//if (__pc > 0x200)
+		//{
+		//	break;
+		//}
 	}
 
 	return 0;
@@ -650,11 +650,11 @@ bool Simulator::handle_sim_syscall()
 	case SyscallType::Finish:
 		printout("Finishing.\n");
 		//exit(0);
-		return true;
+		return false;
 		break;
 	}
 
-	return false;
+	return true;
 }
 
 void Simulator::perf_group_0_scalar_op()
