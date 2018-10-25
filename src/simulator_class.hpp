@@ -102,11 +102,21 @@ private:		// functions
 
 		if constexpr (DSRC_LAR_ARR_SIZE < TEMP_ARR_SIZE)
 		{
+			ASM_COMMENT("cast_and_copy_to_int_temp_dsrc_arr():  "
+				"DSRC_LAR_ARR_SIZE < TEMP_ARR_SIZE");
 			size_t i = 0;
 
 			if constexpr (std::is_same<DsrcType, u8>()
 				|| std::is_same<DsrcType, s8>())
 			{
+				if constexpr (std::is_unsigned<DsrcType>())
+				{
+					ASM_COMMENT("DsrcType u8");
+				}
+				else
+				{
+					ASM_COMMENT("DsrcType s8");
+				}
 				for (i=0; i<DSRC_LAR_ARR_SIZE; ++i)
 				{
 					temp_dsrc_arr[i] = static_cast<DdestType>
@@ -117,6 +127,14 @@ private:		// functions
 			else if constexpr (std::is_same<DsrcType, u16>()
 				|| std::is_same<DsrcType, s16>())
 			{
+				if constexpr (std::is_unsigned<DsrcType>())
+				{
+					ASM_COMMENT("DsrcType u16");
+				}
+				else
+				{
+					ASM_COMMENT("DsrcType s16");
+				}
 				for (i=0; i<DSRC_LAR_ARR_SIZE; ++i)
 				{
 					temp_dsrc_arr[i] = static_cast<DdestType>
@@ -127,6 +145,14 @@ private:		// functions
 			else if constexpr (std::is_same<DsrcType, u32>()
 				|| std::is_same<DsrcType, s32>())
 			{
+				if constexpr (std::is_unsigned<DsrcType>())
+				{
+					ASM_COMMENT("DsrcType u32");
+				}
+				else
+				{
+					ASM_COMMENT("DsrcType s32");
+				}
 				for (i=0; i<DSRC_LAR_ARR_SIZE; ++i)
 				{
 					temp_dsrc_arr[i] = static_cast<DdestType>
@@ -137,6 +163,14 @@ private:		// functions
 			else if constexpr (std::is_same<DsrcType, u64>()
 				|| std::is_same<DsrcType, s64>())
 			{
+				if constexpr (std::is_unsigned<DsrcType>())
+				{
+					ASM_COMMENT("DsrcType u64");
+				}
+				else
+				{
+					ASM_COMMENT("DsrcType s64");
+				}
 				for (i=0; i<DSRC_LAR_ARR_SIZE; ++i)
 				{
 					temp_dsrc_arr[i] = static_cast<DdestType>
@@ -144,6 +178,17 @@ private:		// functions
 						(i * sizeof(DsrcType))));
 				}
 			}
+			else if constexpr (std::is_same<DsrcType, BFloat16>())
+			{
+				ASM_COMMENT("DsrcType BFloat16");
+				for (size_t i=0; i<DSRC_LAR_ARR_SIZE; ++i)
+				{
+					temp_dsrc_arr[i] = BFloat16(curr_data.get_16(i
+						* sizeof(DsrcType))).cast_to_int<DdestType>();
+				}
+			}
+
+			ASM_COMMENT("for loop");
 			for (; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_dsrc_arr[i] = 0;
@@ -151,9 +196,19 @@ private:		// functions
 		}
 		else if constexpr (DSRC_LAR_ARR_SIZE >= TEMP_ARR_SIZE)
 		{
+			ASM_COMMENT("cast_and_copy_to_int_temp_dsrc_arr():  "
+				"DSRC_LAR_ARR_SIZE >= TEMP_ARR_SIZE");
 			if constexpr (std::is_same<DsrcType, u8>()
 				|| std::is_same<DsrcType, s8>())
 			{
+				if constexpr (std::is_unsigned<DsrcType>())
+				{
+					ASM_COMMENT("DsrcType u8");
+				}
+				else
+				{
+					ASM_COMMENT("DsrcType s8");
+				}
 				for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 				{
 					temp_dsrc_arr[i] = curr_data.get_8(i
@@ -163,6 +218,14 @@ private:		// functions
 			else if constexpr (std::is_same<DsrcType, u16>()
 				|| std::is_same<DsrcType, s16>())
 			{
+				if constexpr (std::is_unsigned<DsrcType>())
+				{
+					ASM_COMMENT("DsrcType u16");
+				}
+				else
+				{
+					ASM_COMMENT("DsrcType s16");
+				}
 				for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 				{
 					temp_dsrc_arr[i] = curr_data.get_16(i
@@ -172,6 +235,14 @@ private:		// functions
 			else if constexpr (std::is_same<DsrcType, u32>()
 				|| std::is_same<DsrcType, s32>())
 			{
+				if constexpr (std::is_unsigned<DsrcType>())
+				{
+					ASM_COMMENT("DsrcType u32");
+				}
+				else
+				{
+					ASM_COMMENT("DsrcType s32");
+				}
 				for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 				{
 					temp_dsrc_arr[i] = curr_data.get_32(i
@@ -181,10 +252,28 @@ private:		// functions
 			else if constexpr (std::is_same<DsrcType, u64>()
 				|| std::is_same<DsrcType, s64>())
 			{
+				if constexpr (std::is_unsigned<DsrcType>())
+				{
+					ASM_COMMENT("DsrcType u64");
+				}
+				else
+				{
+					ASM_COMMENT("DsrcType s64");
+				}
 				for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 				{
 					temp_dsrc_arr[i] = curr_data.get_64(i
 						* sizeof(DsrcType));
+				}
+			}
+			else if constexpr (std::is_same<DsrcType, BFloat16>())
+			{
+				ASM_COMMENT("DsrcType BFloat16");
+
+				for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+				{
+					temp_dsrc_arr[i] = BFloat16(curr_data.get_16(i
+						* sizeof(DsrcType))).cast_to_int<DdestType>();
 				}
 			}
 		}

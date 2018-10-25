@@ -1003,8 +1003,6 @@ void Simulator::inner_perf_group_0_scalar_op()
 template<typename DdestType>
 void Simulator::inner_perf_group_0_vector_op()
 {
-	const auto old_rounding_mode = fegetround();
-	fesetround(FE_TOWARDZERO);
 
 	static constexpr size_t TEMP_ARR_SIZE = num_lar_elems<DdestType>();
 
@@ -1069,9 +1067,55 @@ void Simulator::inner_perf_group_0_vector_op()
 			}
 		};
 
+		ASM_COMMENT("integer fill_temp_dsrc_arr(), dsrc0");
 		fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
+		ASM_COMMENT("integer fill_temp_dsrc_arr(), dsrc1");
 		fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
 
+		if constexpr (sizeof(DdestType) == sizeof(u8))
+		{
+			if constexpr (std::is_unsigned<DdestType>())
+			{
+				ASM_COMMENT("vector u8 ops");
+			}
+			else
+			{
+				ASM_COMMENT("vector s8 ops");
+			}
+		}
+		else if constexpr (sizeof(DdestType) == sizeof(u16))
+		{
+			if constexpr (std::is_unsigned<DdestType>())
+			{
+				ASM_COMMENT("vector u16 ops");
+			}
+			else
+			{
+				ASM_COMMENT("vector s16 ops");
+			}
+		}
+		else if constexpr (sizeof(DdestType) == sizeof(u32))
+		{
+			if constexpr (std::is_unsigned<DdestType>())
+			{
+				ASM_COMMENT("vector u32 ops");
+			}
+			else
+			{
+				ASM_COMMENT("vector s32 ops");
+			}
+		}
+		else // if constexpr (sizeof(DdestType) == sizeof(u64))
+		{
+			if constexpr (std::is_unsigned<DdestType>())
+			{
+				ASM_COMMENT("vector u64 ops");
+			}
+			else
+			{
+				ASM_COMMENT("vector s64 ops");
+			}
+		}
 		switch (static_cast<InstrDecoder::Iog0Oper>
 			(__instr_decoder.oper()))
 		{
@@ -1097,14 +1141,7 @@ void Simulator::inner_perf_group_0_vector_op()
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
-			if constexpr (std::is_same<DdestType, u8>())
-			{
-				ASM_COMMENT("u8 vector multiplies");
-			}
-			else if constexpr (std::is_same<DdestType, s8>())
-			{
-				ASM_COMMENT("s8 vector multiplies");
-			}
+			ASM_COMMENT("vector mul"); 
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i] * temp_dsrc1_arr[i];
@@ -1192,8 +1229,11 @@ void Simulator::inner_perf_group_0_vector_op()
 			}
 			break;
 		default:
+			ASM_COMMENT("default vector op");
 			break;
 		}
+
+		ASM_COMMENT("after vector ops");
 
 		
 		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
@@ -1219,9 +1259,17 @@ void Simulator::inner_perf_group_0_vector_op()
 					temp_ddest_arr[i]);
 			}
 		}
+
+		ASM_COMMENT("after setting curr_data");
 	}
 	else if constexpr (std::is_same<DdestType, BFloat16>())
 	{
+		ASM_COMMENT("fegetround()");
+		const auto old_rounding_mode = fegetround();
+
+		ASM_COMMENT("FE_TOWARDZERO");
+		fesetround(FE_TOWARDZERO);
+
 		float temp_ddest_float_arr[TEMP_ARR_SIZE],
 			temp_dsrc0_float_arr[TEMP_ARR_SIZE],
 			temp_dsrc1_float_arr[TEMP_ARR_SIZE];
@@ -1281,9 +1329,13 @@ void Simulator::inner_perf_group_0_vector_op()
 			}
 		};
 
+		ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc0");
 		fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
+
+		ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc1");
 		fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
 
+		ASM_COMMENT("fill temp_dsrc_float_arr");
 		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 		{
 			temp_dsrc0_float_arr[i]
@@ -1357,10 +1409,11 @@ void Simulator::inner_perf_group_0_vector_op()
 			curr_data.set_16((i * sizeof(BFloat16)),
 				temp_ddest_arr[i].data());
 		}
+		ASM_COMMENT("fesetround");
+		fesetround(old_rounding_mode);
 	}
 
 
-	fesetround(old_rounding_mode);
 }
 
 std::string Simulator::get_reg_name_str(LarFile::RegName some_reg_name)

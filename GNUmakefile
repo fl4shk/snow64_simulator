@@ -189,12 +189,12 @@ $(S_OFILES) : $(OBJDIR)/%.o : %.s
 
 # Here we have stuff for outputting assembly source code instead of an object file.
 $(CXX_ASMOUTS) : $(ASMOUTDIR)/%.s : %.cpp
-	$(CXX) $(CXX_FLAGS) -MMD -S $(VERBOSE_ASM_FLAG) $< -o $@
+	$(CXX) $(CXX_FLAGS) -MMD -masm=intel -S $(VERBOSE_ASM_FLAG) $< -o $@
 	@cp $(ASMOUTDIR)/$*.d $(DEPDIR)/$*.P
 	@rm -f $(ASMOUTDIR)/$*.d
 
 $(C_ASMOUTS) : $(ASMOUTDIR)/%.s : %.c
-	$(CC) $(C_FLAGS) -MMD -S $(VERBOSE_ASM_FLAG) $< -o $@
+	$(CC) $(C_FLAGS) -MMD -masm=intel -S $(VERBOSE_ASM_FLAG) $< -o $@
 	@cp $(ASMOUTDIR)/$*.d $(DEPDIR)/$*.P
 	@rm -f $(ASMOUTDIR)/$*.d
 
