@@ -16,7 +16,7 @@ NS_DIRS:=$(SHARED_SRC_DIRS)
 #DEBUG:=yeah do debug
 
 DEBUG_OPTIMIZATION_LEVEL:=-O0
-REGULAR_OPTIMIZATION_LEVEL:=-O2
+REGULAR_OPTIMIZATION_LEVEL:=-O3
 
 
 ALWAYS_DEBUG_SUFFIX:=_debug
@@ -65,13 +65,13 @@ endif
 
 #FINAL_BASE_FLAGS:=$(OPTIMIZATION_LEVEL) \
 #	$(EXTRA_BASE_FLAGS) $(EXTRA_DEBUG_FLAGS) \
-#	-mavx2 -ftree-vectorize
+#	-mavx -mavx512f -ftree-vectorize
 FINAL_BASE_FLAGS:=$(OPTIMIZATION_LEVEL) \
 	$(EXTRA_BASE_FLAGS) $(EXTRA_DEBUG_FLAGS) \
-	-fopt-info-vec -mavx2 -ftree-vectorize
+	-fopt-info-vec -mavx512f -ftree-vectorize
 #FINAL_BASE_FLAGS:=$(OPTIMIZATION_LEVEL) \
 #	$(EXTRA_BASE_FLAGS) $(EXTRA_DEBUG_FLAGS) \
-#	-fopt-info-vec -fopt-info-vec-missed -mavx2 -ftree-vectorize
+#	-fopt-info-vec -fopt-info-vec-missed -mavx512f -ftree-vectorize
 
 # Final compiler and linker flags
 CXX_FLAGS:=$(CXX_FLAGS) $(FINAL_BASE_FLAGS)

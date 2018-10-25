@@ -25,5 +25,7 @@ using namespace liborangepower::strings;
 #include <array>
 #include <fenv.h>
 
+#include <immintrin.h>
+
 
 #endif		// src__slash__misc_includes_hpp

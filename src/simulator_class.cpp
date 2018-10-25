@@ -1076,24 +1076,35 @@ void Simulator::inner_perf_group_0_vector_op()
 			(__instr_decoder.oper()))
 		{
 		case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+			ASM_COMMENT("vector add");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i] + temp_dsrc1_arr[i];
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+			ASM_COMMENT("vector sub");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i] - temp_dsrc1_arr[i];
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+			ASM_COMMENT("vector slt");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i] < temp_dsrc1_arr[i];
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+			if constexpr (std::is_same<DdestType, u8>())
+			{
+				ASM_COMMENT("u8 vector multiplies");
+			}
+			else if constexpr (std::is_same<DdestType, s8>())
+			{
+				ASM_COMMENT("s8 vector multiplies");
+			}
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i] * temp_dsrc1_arr[i];
@@ -1101,24 +1112,28 @@ void Simulator::inner_perf_group_0_vector_op()
 			break;
 
 		case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+			ASM_COMMENT("vector div");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i] / temp_dsrc1_arr[i];
 			}
 			break;
 		case InstrDecoder::Iog0Oper::And_ThreeRegs:
+			ASM_COMMENT("vector and");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i] & temp_dsrc1_arr[i];
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Orr_ThreeRegs:
+			ASM_COMMENT("vector orr");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i] | temp_dsrc1_arr[i];
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Xor_ThreeRegs:
+			ASM_COMMENT("vector xor");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i] ^ temp_dsrc1_arr[i];
@@ -1126,6 +1141,7 @@ void Simulator::inner_perf_group_0_vector_op()
 			break;
 
 		case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
+			ASM_COMMENT("vector shl");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i] << temp_dsrc1_arr[i];
@@ -1134,6 +1150,7 @@ void Simulator::inner_perf_group_0_vector_op()
 		case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
 			// This might not be a perfect match to what the hardware
 			// actually does?
+			ASM_COMMENT("vector shr");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i]
@@ -1141,12 +1158,14 @@ void Simulator::inner_perf_group_0_vector_op()
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Inv_TwoRegs:
+			ASM_COMMENT("vector inv");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = ~temp_dsrc0_arr[i];
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Not_TwoRegs:
+			ASM_COMMENT("vector not");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = !temp_dsrc0_arr[i];
@@ -1154,6 +1173,7 @@ void Simulator::inner_perf_group_0_vector_op()
 			break;
 
 		case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
+			ASM_COMMENT("vector addi pc");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = static_cast<DdestType>
@@ -1163,6 +1183,7 @@ void Simulator::inner_perf_group_0_vector_op()
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
+			ASM_COMMENT("vector addi dsrc0");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_arr[i] = temp_dsrc0_arr[i]
@@ -1275,6 +1296,7 @@ void Simulator::inner_perf_group_0_vector_op()
 			(__instr_decoder.oper()))
 		{
 		case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+			ASM_COMMENT("vector float add");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
@@ -1282,6 +1304,7 @@ void Simulator::inner_perf_group_0_vector_op()
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+			ASM_COMMENT("vector float sub");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
@@ -1289,6 +1312,7 @@ void Simulator::inner_perf_group_0_vector_op()
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+			ASM_COMMENT("vector float slt");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
@@ -1296,6 +1320,7 @@ void Simulator::inner_perf_group_0_vector_op()
 			}
 			break;
 		case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+			ASM_COMMENT("vector float mul");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
@@ -1304,6 +1329,7 @@ void Simulator::inner_perf_group_0_vector_op()
 			break;
 
 		case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+			ASM_COMMENT("vector float div");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
@@ -1311,6 +1337,7 @@ void Simulator::inner_perf_group_0_vector_op()
 			}
 			break;
 		default:
+			ASM_COMMENT("vector float dud");
 			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 			{
 				temp_ddest_float_arr[i]  = 0;
@@ -1318,11 +1345,13 @@ void Simulator::inner_perf_group_0_vector_op()
 			break;
 		}
 
+		ASM_COMMENT("vector float op copy to temp_ddest_arr");
 		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 		{
 			temp_ddest_arr[i] = BFloat16(temp_ddest_float_arr[i]);
 		}
 
+		ASM_COMMENT("vector float op copy to curr_data");
 		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 		{
 			curr_data.set_16((i * sizeof(BFloat16)),

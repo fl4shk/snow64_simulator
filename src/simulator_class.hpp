@@ -7,6 +7,7 @@
 #include "lar_file_class.hpp"
 #include "instr_decoder_class.hpp"
 #include "bfloat16_class.hpp"
+#include "avx_wrapper_classes.hpp"
 
 namespace snow64_simulator
 {
@@ -188,6 +189,16 @@ private:		// functions
 			}
 		}
 	}
+
+	//template<typename DdestType, typename DsrcType>
+	//static inline void cast_and_copy_to_int_temp_dsrc_arr
+	//	(const LarFile::RefLarContents& curr_dsrc_contents,
+	//	DdestType* temp_dsrc_arr)
+	//{
+	//	static constexpr size_t TEMP_ARR_SIZE = num_lar_elems<DdestType>();
+	//	static constexpr size_t DSRC_LAR_ARR_SIZE
+	//		= num_lar_elems<DsrcType>();
+	//}
 
 
 	template<typename DsrcType>
