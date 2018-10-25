@@ -183,8 +183,9 @@ private:		// functions
 				ASM_COMMENT("DsrcType BFloat16");
 				for (size_t i=0; i<DSRC_LAR_ARR_SIZE; ++i)
 				{
-					temp_dsrc_arr[i] = BFloat16(curr_data.get_16(i
-						* sizeof(DsrcType))).cast_to_int<DdestType>();
+					temp_dsrc_arr[i] = static_cast<DdestType>
+						(static_cast<float>(BFloat16(curr_data.get_16(i
+						* sizeof(DsrcType)))));
 				}
 			}
 
@@ -272,8 +273,9 @@ private:		// functions
 
 				for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 				{
-					temp_dsrc_arr[i] = BFloat16(curr_data.get_16(i
-						* sizeof(DsrcType))).cast_to_int<DdestType>();
+					temp_dsrc_arr[i] = static_cast<DdestType>
+						(static_cast<float>(BFloat16(curr_data.get_16(i
+						* sizeof(DsrcType)))));
 				}
 			}
 		}

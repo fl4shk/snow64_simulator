@@ -639,6 +639,8 @@ bool Simulator::handle_sim_syscall()
 		printout(get_reg_name_str(ddest_index_reg_name),
 			" scalar data:  ",
 			std::hex, __curr_ddest_contents.scalar_data(), std::dec,
+			//"\n... and vector data:  ",
+			//std::hex, __curr_ddest_contents.shareddata->data, std::dec,
 			"\n");
 		break;
 	case SyscallType::DispDdestAddr:
