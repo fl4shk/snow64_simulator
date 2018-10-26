@@ -63,12 +63,12 @@ endif
 
 
 
-#FINAL_BASE_FLAGS:=$(OPTIMIZATION_LEVEL) \
-#	$(EXTRA_BASE_FLAGS) $(EXTRA_DEBUG_FLAGS) \
-#	-mavx -mavx512f -ftree-vectorize
 FINAL_BASE_FLAGS:=$(OPTIMIZATION_LEVEL) \
 	$(EXTRA_BASE_FLAGS) $(EXTRA_DEBUG_FLAGS) \
-	-fopt-info-vec -mavx512f -ftree-vectorize
+	-mavx512f -ftree-vectorize
+#FINAL_BASE_FLAGS:=$(OPTIMIZATION_LEVEL) \
+#	$(EXTRA_BASE_FLAGS) $(EXTRA_DEBUG_FLAGS) \
+#	-fopt-info-vec -mavx512f -ftree-vectorize
 #FINAL_BASE_FLAGS:=$(OPTIMIZATION_LEVEL) \
 #	$(EXTRA_BASE_FLAGS) $(EXTRA_DEBUG_FLAGS) \
 #	-fopt-info-vec -fopt-info-vec-missed -mavx512f -ftree-vectorize

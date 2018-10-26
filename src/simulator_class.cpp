@@ -150,8 +150,6 @@ Simulator::~Simulator()
 
 int Simulator::run()
 {
-	//printout(BasicWord::NUM_DATA_ELEMS, "\n");
-
 	for (;;)
 	{
 		//printout(std::hex, __pc, std::dec, ":  ");
@@ -209,6 +207,8 @@ void Simulator::perf_instr_decode()
 		__instr_decoder.dsrc0_index(), __instr_decoder.dsrc1_index(),
 		__curr_ddest_contents, __curr_dsrc0_contents,
 		__curr_dsrc1_contents);
+
+
 
 
 	if (__instr_decoder.nop())
@@ -437,6 +437,12 @@ void Simulator::perf_instr_decode()
 	//default:
 	//	break;
 	//}
+	//printout("perf_instr_decode():  lar data:  \n",
+	//	std::hex,
+	//	__curr_ddest_contents.shareddata->data, "\n",
+	//	__curr_dsrc0_contents.shareddata->data, "\n",
+	//	__curr_dsrc1_contents.shareddata->data, "\n",
+	//	std::dec);
 }
 
 bool Simulator::perf_instr_exec()
@@ -1011,6 +1017,8 @@ void Simulator::inner_perf_group_0_vector_op()
 	DdestType temp_ddest_arr[TEMP_ARR_SIZE], temp_dsrc0_arr[TEMP_ARR_SIZE],
 		temp_dsrc1_arr[TEMP_ARR_SIZE];
 
+	__curr_ddest_contents.shareddata->dirty = true;
+
 	auto& curr_data = __curr_ddest_contents.shareddata->data;
 	if constexpr (std::is_integral<DdestType>())
 	{
@@ -1073,6 +1081,19 @@ void Simulator::inner_perf_group_0_vector_op()
 		fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
 		ASM_COMMENT("integer fill_temp_dsrc_arr(), dsrc1");
 		fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
+
+		//printout("integer vector op temp dsrc arrs:  \n");
+		//printout(std::hex);
+		//for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+		//{
+		//	printout(temp_dsrc0_arr[i], " ");
+		//}
+		//printout("\n");
+		//for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+		//{
+		//	printout(temp_dsrc1_arr[i], " ");
+		//}
+		//printout(std::dec, "\n");
 
 		if constexpr (sizeof(DdestType) == sizeof(u8))
 		{
@@ -1236,6 +1257,21 @@ void Simulator::inner_perf_group_0_vector_op()
 		}
 
 		ASM_COMMENT("after vector ops");
+
+		//bool found_nonzero = false;
+		//for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+		//{
+		//	if (temp_ddest_arr[i] != 0)
+		//	{
+		//		found_nonzero = true;
+		//		break;
+		//	}
+		//}
+		//if (!found_nonzero)
+		//{
+		//	printout("Integer vector op:  writing all zeros to destination"
+		//		" register.\n");
+		//}
 
 		
 		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)

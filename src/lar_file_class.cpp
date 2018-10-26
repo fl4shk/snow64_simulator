@@ -21,6 +21,10 @@ void LarFile::perf_ldst(bool is_store, size_t ddest_index,
 	Address eff_addr, DataType n_data_type, TypeSize n_type_size,
 	std::unique_ptr<BasicWord[]>& mem, size_t mem_amount_in_words)
 {
+	//if (is_store)
+	//{
+	//	printout("LarFile::perf_ldst is_store\n");
+	//}
 	//printout("LarFile::perf_ldst() stuff:  ",
 	//	std::hex, eff_addr, " ",
 	//	mem[convert_addr_to_bw_addr(eff_addr)], std::dec,
@@ -168,6 +172,10 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 	//printout("LarFile::handle_ldst_miss():  ",
 	//	static_cast<u32>(curr_shareddata.ref_count),
 	//	"\n");
+	//printout("LarFile::handle_ldst_miss():  ",
+	//	std::hex, n_base_addr, " ", n_data_offset, std::dec,
+	//	" ", static_cast<u32>(curr_shareddata.ref_count),
+	//	"\n");
 
 	switch (curr_shareddata.ref_count)
 	{
@@ -206,6 +214,11 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 		switch (curr_shareddata.dirty)
 		{
 		case true:
+			//printout("ldst miss curr_shareddata.dirty:  ",
+			//	std::hex, curr_shareddata.data, " ", old_base_addr,
+			//	std::dec,
+			//	"\n");
+
 			// When an address's data is no longer in the LAR file, it must
 			// be sent to memory iff the data has been changed.
 			store_to_mem(curr_shareddata.data, old_base_addr, mem);
@@ -218,6 +231,7 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 			break;
 
 		case false:
+			//printout("ldst miss !curr_shareddata.dirty\n");
 			// Even though we were the only LAR that had data from our
 			// address, the data hasn't been changed, so we don't need to
 			// send it back to memory.
@@ -259,6 +273,10 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 				load_from_mem(n_shareddata.data, n_base_addr, mem);
 				// Loads of fresh data mark us as clean
 				n_shareddata.dirty = false;
+				//printout("ldst miss load:  ",
+				//	std::hex, n_shareddata.data, " ", n_base_addr, " ",
+				//	old_base_addr, std::dec,
+				//	"\n");
 				break;
 
 			case true:

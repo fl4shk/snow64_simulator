@@ -231,6 +231,8 @@ public:		// functions
 
 	//void continue_ldst(const BasicWord& )
 
+	gen_getter_by_con_ref(lar_shareddata)
+
 private:		// functions
 	inline u8 perf_temp_tag_search(size_t i, Address n_base_addr) const
 	{
@@ -263,10 +265,17 @@ private:		// functions
 		std::unique_ptr<BasicWord[]>& mem)
 	{
 		ret = mem[base_addr];
+		//printout("LarFile::load_from_mem():  ",
+		//	std::hex, base_addr, " ", ret, std::dec,
+		//	"\n");
 	}
 	inline void store_to_mem(const BasicWord& to_store, Address base_addr,
 		std::unique_ptr<BasicWord[]>& mem)
 	{
+		//printout("LarFile::store_to_mem():  ",
+		//	std::hex, base_addr, " ", to_store, " ", mem[base_addr],
+		//	std::dec,
+		//	"\n");
 		mem[base_addr] = to_store;
 	}
 };

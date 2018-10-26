@@ -185,6 +185,10 @@ inline std::ostream& operator << (std::ostream& os,
 	for (s64 i=to_show.NUM_DATA_ELEMS-1; i>=0; --i)
 	//for (size_t i=0; i<to_show.NUM_DATA_ELEMS; ++i)
 	{
+		if (to_show.data[i] < 0x10)
+		{
+			osprintout(os, 0);
+		}
 		osprintout(os, static_cast<u32>(to_show.data[i]));
 	}
 	return os;
