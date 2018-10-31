@@ -306,11 +306,11 @@ void Simulator::perf_instr_decode()
 	//	switch (static_cast<InstrDecoder::Iog1Oper>
 	//		(__instr_decoder.oper()))
 	//	{
-	//	case InstrDecoder::Iog1Oper::Btru_OneRegOneSimm20:
+	//	case InstrDecoder::Iog1Oper::Bnz_OneRegOneSimm20:
 	//		printout("btru ", ddest_name, ", ",
 	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
-	//	case InstrDecoder::Iog1Oper::Bfal_OneRegOneSimm20:
+	//	case InstrDecoder::Iog1Oper::Bzo_OneRegOneSimm20:
 	//		printout("bfal ", ddest_name, ", ",
 	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
@@ -467,6 +467,7 @@ bool Simulator::perf_instr_exec()
 			break;
 
 		default:
+			__curr_ddest_contents.shareddata->dirty = true;
 			switch (__instr_decoder.op_type())
 			{
 			case false:
@@ -484,13 +485,13 @@ bool Simulator::perf_instr_exec()
 		switch (static_cast<InstrDecoder::Iog1Oper>
 			(__instr_decoder.oper()))
 		{
-		case InstrDecoder::Iog1Oper::Btru_OneRegOneSimm20:
+		case InstrDecoder::Iog1Oper::Bnz_OneRegOneSimm20:
 			if (__curr_ddest_contents.scalar_data() != 0)
 			{
 				__pc += __instr_decoder.signext_imm();
 			}
 			break;
-		case InstrDecoder::Iog1Oper::Bfal_OneRegOneSimm20:
+		case InstrDecoder::Iog1Oper::Bzo_OneRegOneSimm20:
 			if (__curr_ddest_contents.scalar_data() == 0)
 			{
 				__pc += __instr_decoder.signext_imm();
@@ -670,41 +671,55 @@ void Simulator::perf_group_0_scalar_op()
 	switch (__curr_ddest_contents.metadata->data_type)
 	{
 	case LarFile::DataType::UnsgnInt:
-		switch (__curr_ddest_contents.metadata->type_size)
+		if (__instr_decoder.forced_64_bit_integers())
 		{
-		case LarFile::TypeSize::Sz8:
-			inner_perf_group_0_scalar_op<u8>();
-			break;
-		case LarFile::TypeSize::Sz16:
-			inner_perf_group_0_scalar_op<u16>();
-			break;
-		case LarFile::TypeSize::Sz32:
-			inner_perf_group_0_scalar_op<u32>();
-			break;
-		case LarFile::TypeSize::Sz64:
-			inner_perf_group_0_scalar_op<u64>();
-			break;
+			inner_perf_forced_64_bit_integer_group_0_scalar_op<u64>();
+		}
+		else
+		{
+			switch (__curr_ddest_contents.metadata->type_size)
+			{
+			case LarFile::TypeSize::Sz8:
+				inner_perf_regular_integer_group_0_scalar_op<u8>();
+				break;
+			case LarFile::TypeSize::Sz16:
+				inner_perf_regular_integer_group_0_scalar_op<u16>();
+				break;
+			case LarFile::TypeSize::Sz32:
+				inner_perf_regular_integer_group_0_scalar_op<u32>();
+				break;
+			case LarFile::TypeSize::Sz64:
+				inner_perf_regular_integer_group_0_scalar_op<u64>();
+				break;
+			}
 		}
 		break;
 	case LarFile::DataType::SgnInt:
-		switch (__curr_ddest_contents.metadata->type_size)
+		if (__instr_decoder.forced_64_bit_integers())
 		{
-		case LarFile::TypeSize::Sz8:
-			inner_perf_group_0_scalar_op<s8>();
-			break;
-		case LarFile::TypeSize::Sz16:
-			inner_perf_group_0_scalar_op<s16>();
-			break;
-		case LarFile::TypeSize::Sz32:
-			inner_perf_group_0_scalar_op<s32>();
-			break;
-		case LarFile::TypeSize::Sz64:
-			inner_perf_group_0_scalar_op<s64>();
-			break;
+			inner_perf_forced_64_bit_integer_group_0_scalar_op<s64>();
+		}
+		else
+		{
+			switch (__curr_ddest_contents.metadata->type_size)
+			{
+			case LarFile::TypeSize::Sz8:
+				inner_perf_regular_integer_group_0_scalar_op<s8>();
+				break;
+			case LarFile::TypeSize::Sz16:
+				inner_perf_regular_integer_group_0_scalar_op<s16>();
+				break;
+			case LarFile::TypeSize::Sz32:
+				inner_perf_regular_integer_group_0_scalar_op<s32>();
+				break;
+			case LarFile::TypeSize::Sz64:
+				inner_perf_regular_integer_group_0_scalar_op<s64>();
+				break;
+			}
 		}
 		break;
 	case LarFile::DataType::BFloat16:
-		inner_perf_group_0_scalar_op<BFloat16>();
+		inner_perf_bfloat16_group_0_scalar_op();
 		break;
 	}
 }
@@ -714,744 +729,1319 @@ void Simulator::perf_group_0_vector_op()
 	switch (__curr_ddest_contents.metadata->data_type)
 	{
 	case LarFile::DataType::UnsgnInt:
-		switch (__curr_ddest_contents.metadata->type_size)
+		if (__instr_decoder.forced_64_bit_integers())
 		{
-		case LarFile::TypeSize::Sz8:
-			inner_perf_group_0_vector_op<u8>();
-			break;
-		case LarFile::TypeSize::Sz16:
-			inner_perf_group_0_vector_op<u16>();
-			break;
-		case LarFile::TypeSize::Sz32:
-			inner_perf_group_0_vector_op<u32>();
-			break;
-		case LarFile::TypeSize::Sz64:
-			inner_perf_group_0_vector_op<u64>();
-			break;
+			inner_perf_forced_64_bit_integer_group_0_vector_op<u64>();
+		}
+		else
+		{
+			switch (__curr_ddest_contents.metadata->type_size)
+			{
+			case LarFile::TypeSize::Sz8:
+				inner_perf_regular_integer_group_0_vector_op<u8>();
+				break;
+			case LarFile::TypeSize::Sz16:
+				inner_perf_regular_integer_group_0_vector_op<u16>();
+				break;
+			case LarFile::TypeSize::Sz32:
+				inner_perf_regular_integer_group_0_vector_op<u32>();
+				break;
+			case LarFile::TypeSize::Sz64:
+				inner_perf_regular_integer_group_0_vector_op<u64>();
+				break;
+			}
 		}
 		break;
 	case LarFile::DataType::SgnInt:
-		switch (__curr_ddest_contents.metadata->type_size)
+		if (__instr_decoder.forced_64_bit_integers())
 		{
-		case LarFile::TypeSize::Sz8:
-			inner_perf_group_0_vector_op<s8>();
-			break;
-		case LarFile::TypeSize::Sz16:
-			inner_perf_group_0_vector_op<s16>();
-			break;
-		case LarFile::TypeSize::Sz32:
-			inner_perf_group_0_vector_op<s32>();
-			break;
-		case LarFile::TypeSize::Sz64:
-			inner_perf_group_0_vector_op<s64>();
-			break;
+			inner_perf_forced_64_bit_integer_group_0_vector_op<s64>();
+		}
+		else
+		{
+			switch (__curr_ddest_contents.metadata->type_size)
+			{
+			case LarFile::TypeSize::Sz8:
+				inner_perf_regular_integer_group_0_vector_op<s8>();
+				break;
+			case LarFile::TypeSize::Sz16:
+				inner_perf_regular_integer_group_0_vector_op<s16>();
+				break;
+			case LarFile::TypeSize::Sz32:
+				inner_perf_regular_integer_group_0_vector_op<s32>();
+				break;
+			case LarFile::TypeSize::Sz64:
+				inner_perf_regular_integer_group_0_vector_op<s64>();
+				break;
+			}
 		}
 		break;
 	case LarFile::DataType::BFloat16:
-		inner_perf_group_0_vector_op<BFloat16>();
+		inner_perf_bfloat16_group_0_vector_op();
 		break;
 	}
 }
 
+//template<typename DdestType>
+//void Simulator::inner_perf_regular_group_0_scalar_op()
+//{
+//	const auto old_rounding_mode = fegetround();
+//	fesetround(FE_TOWARDZERO);
+//
+//	__curr_ddest_contents.shareddata->dirty = true;
+//	auto& curr_data = __curr_ddest_contents.shareddata->data;
+//
+//
+//	DdestType temp_ddest, temp_dsrc0, temp_dsrc1;
+//
+//	if constexpr (std::is_integral<DdestType>())
+//	{
+//		temp_ddest = 0;
+//		auto get_temp_dsrc
+//			= [&](const LarFile::RefLarContents& curr_dsrc_contents)
+//			-> DdestType
+//		{
+//			switch (curr_dsrc_contents.metadata->data_type)
+//			{
+//			case LarFile::DataType::UnsgnInt:
+//				return static_cast<DdestType>(curr_dsrc_contents
+//					.scalar_data());
+//			case LarFile::DataType::SgnInt:
+//				return static_cast<DdestType>(curr_dsrc_contents
+//					.sgn_scalar_data());
+//			//case LarFile::DataType::BFloat16:
+//			default:
+//				return BFloat16(static_cast<s16>(curr_dsrc_contents
+//					.scalar_data())).cast_to_int<DdestType>();
+//			}
+//		};
+//
+//		temp_dsrc0 = get_temp_dsrc(__curr_dsrc0_contents);
+//		temp_dsrc1 = get_temp_dsrc(__curr_dsrc1_contents);
+//	}
+//	else if constexpr (std::is_same<DdestType, BFloat16>())
+//	{
+//		temp_ddest = BFloat16();
+//		auto get_temp_dsrc
+//			= [&](const LarFile::RefLarContents& curr_dsrc_contents)
+//			-> DdestType
+//		{
+//			switch (curr_dsrc_contents.metadata->data_type)
+//			{
+//			case LarFile::DataType::UnsgnInt:
+//				return BFloat16::create_from_int(curr_dsrc_contents
+//					.scalar_data());
+//			case LarFile::DataType::SgnInt:
+//				return BFloat16::create_from_int(curr_dsrc_contents
+//					.sgn_scalar_data());
+//			//case LarFile::DataType::BFloat16:
+//			default:
+//				return BFloat16(curr_dsrc_contents.scalar_data());
+//			}
+//		};
+//
+//		temp_dsrc0 = get_temp_dsrc(__curr_dsrc0_contents);
+//		temp_dsrc1 = get_temp_dsrc(__curr_dsrc1_contents);
+//	}
+//
+//
+//	switch (static_cast<InstrDecoder::Iog0Oper>
+//		(__instr_decoder.oper()))
+//	{
+//	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+//		if constexpr (std::is_same<DdestType, BFloat16>())
+//		{
+//			temp_ddest = BFloat16(float(temp_dsrc0) + float(temp_dsrc1));
+//		}
+//		else
+//		{
+//			temp_ddest = temp_dsrc0 + temp_dsrc1;
+//		}
+//		break;
+//	case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+//		if constexpr (std::is_same<DdestType, BFloat16>())
+//		{
+//			temp_ddest = BFloat16(float(temp_dsrc0) - float(temp_dsrc1));
+//		}
+//		else
+//		{
+//			temp_ddest = temp_dsrc0 - temp_dsrc1;
+//		}
+//		break;
+//	case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+//		if constexpr (std::is_same<DdestType, BFloat16>())
+//		{
+//			temp_ddest = BFloat16(float(temp_dsrc0
+//				< temp_dsrc1));
+//		}
+//		else
+//		{
+//			temp_ddest = temp_dsrc0 < temp_dsrc1;
+//		}
+//		break;
+//	case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+//		if constexpr (std::is_same<DdestType, BFloat16>())
+//		{
+//			temp_ddest = BFloat16(float(temp_dsrc0) * float(temp_dsrc1));
+//		}
+//		else
+//		{
+//			temp_ddest = temp_dsrc0 * temp_dsrc1;
+//		}
+//		break;
+//
+//	//case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+//	//	if constexpr (std::is_same<DdestType, BFloat16>())
+//	//	{
+//	//		temp_ddest = BFloat16(float(temp_dsrc0) / float(temp_dsrc1));
+//	//	}
+//	//	else
+//	//	{
+//	//		temp_ddest = temp_dsrc0 / temp_dsrc1;
+//	//	}
+//	//	break;
+//	case InstrDecoder::Iog0Oper::And_ThreeRegs:
+//		if constexpr (std::is_same<DdestType, BFloat16>())
+//		{
+//			temp_ddest = BFloat16();
+//		}
+//		else
+//		{
+//			temp_ddest = temp_dsrc0 & temp_dsrc1;
+//		}
+//		break;
+//	case InstrDecoder::Iog0Oper::Orr_ThreeRegs:
+//		if constexpr (std::is_same<DdestType, BFloat16>())
+//		{
+//			temp_ddest = BFloat16();
+//		}
+//		else
+//		{
+//			temp_ddest = temp_dsrc0 | temp_dsrc1;
+//		}
+//		break;
+//	case InstrDecoder::Iog0Oper::Xor_ThreeRegs:
+//		if constexpr (std::is_same<DdestType, BFloat16>())
+//		{
+//			temp_ddest = BFloat16();
+//		}
+//		else
+//		{
+//			temp_ddest = temp_dsrc0 ^ temp_dsrc1;
+//		}
+//		break;
+//
+//	//case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
+//	//	if constexpr (std::is_same<DdestType, BFloat16>())
+//	//	{
+//	//		temp_ddest = BFloat16();
+//	//	}
+//	//	else
+//	//	{
+//	//		temp_ddest = temp_dsrc0 << temp_dsrc1;
+//	//	}
+//	//	break;
+//	//case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
+//	//	if constexpr (std::is_same<DdestType, BFloat16>())
+//	//	{
+//	//		temp_ddest = BFloat16();
+//	//	}
+//	//	else
+//	//	{
+//	//		// This might not be a perfect match to what the hardware
+//	//		// actually does?
+//	//		temp_ddest = temp_dsrc0 >> static_cast<u64>(temp_dsrc1);
+//	//	}
+//	//	break;
+//	case InstrDecoder::Iog0Oper::Inv_TwoRegs:
+//		if constexpr (std::is_same<DdestType, BFloat16>())
+//		{
+//			temp_ddest = BFloat16();
+//		}
+//		else
+//		{
+//			temp_ddest = ~temp_dsrc0;
+//		}
+//		break;
+//	//case InstrDecoder::Iog0Oper::Not_TwoRegs:
+//	//	if constexpr (std::is_same<DdestType, BFloat16>())
+//	//	{
+//	//		temp_ddest = BFloat16();
+//	//	}
+//	//	else
+//	//	{
+//	//		temp_ddest = !temp_dsrc0;
+//	//	}
+//	//	break;
+//
+//	case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
+//		if constexpr (std::is_same<DdestType, BFloat16>())
+//		{
+//			temp_ddest = BFloat16();
+//		}
+//		else
+//		{
+//			temp_ddest = static_cast<DdestType>
+//				(__pc - sizeof(InstrDecoder::Instr))
+//				+ static_cast<DdestType>(__instr_decoder.signext_imm());
+//		}
+//		break;
+//	case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
+//		if constexpr (std::is_same<DdestType, BFloat16>())
+//		{
+//			temp_ddest = BFloat16();
+//		}
+//		else
+//		{
+//			temp_ddest = temp_dsrc0
+//				+ static_cast<DdestType>(__instr_decoder.signext_imm());
+//		}
+//		break;
+//	default:
+//		break;
+//	}
+//
+//	if constexpr (std::is_same<DdestType, BFloat16>())
+//	{
+//		curr_data.set_16(__curr_ddest_contents.metadata->data_offset,
+//			temp_ddest.data());
+//	}
+//	else
+//	{
+//		if constexpr (std::is_same<DdestType, u8>()
+//			|| std::is_same<DdestType, s8>())
+//		{
+//			curr_data.set_8(__curr_ddest_contents.metadata->data_offset,
+//				temp_ddest);
+//		}
+//		else if constexpr (std::is_same<DdestType, u16>()
+//			|| std::is_same<DdestType, s16>())
+//		{
+//			curr_data.set_16(__curr_ddest_contents.metadata->data_offset,
+//				temp_ddest);
+//		}
+//		else if constexpr (std::is_same<DdestType, u32>()
+//			|| std::is_same<DdestType, s32>())
+//		{
+//			curr_data.set_32(__curr_ddest_contents.metadata->data_offset,
+//				temp_ddest);
+//		}
+//		else if constexpr (std::is_same<DdestType, u64>()
+//			|| std::is_same<DdestType, s64>())
+//		{
+//			curr_data.set_64(__curr_ddest_contents.metadata->data_offset,
+//				temp_ddest);
+//		}
+//	}
+//
+//	fesetround(old_rounding_mode);
+//}
+//
+//template<typename DdestType>
+//void Simulator::inner_perf_regular_group_0_vector_op()
+//{
+//
+//	static constexpr size_t TEMP_ARR_SIZE = num_lar_elems<DdestType>();
+//
+//	DdestType temp_ddest_arr[TEMP_ARR_SIZE], temp_dsrc0_arr[TEMP_ARR_SIZE],
+//		temp_dsrc1_arr[TEMP_ARR_SIZE];
+//
+//	__curr_ddest_contents.shareddata->dirty = true;
+//
+//	auto& curr_data = __curr_ddest_contents.shareddata->data;
+//	if constexpr (std::is_integral<DdestType>())
+//	{
+//		auto fill_temp_dsrc_arr
+//			= [&](const LarFile::RefLarContents& curr_dsrc_contents,
+//			DdestType* temp_dsrc_arr) -> void
+//		{
+//			switch (curr_dsrc_contents.metadata->data_type)
+//			{
+//			case LarFile::DataType::UnsgnInt:
+//				switch (curr_dsrc_contents.metadata->type_size)
+//				{
+//				case LarFile::TypeSize::Sz8:
+//					cast_and_copy_to_int_temp_dsrc_arr<DdestType, u8>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz16:
+//					cast_and_copy_to_int_temp_dsrc_arr<DdestType, u16>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz32:
+//					cast_and_copy_to_int_temp_dsrc_arr<DdestType, u32>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz64:
+//					cast_and_copy_to_int_temp_dsrc_arr<DdestType, u64>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				}
+//				break;
+//			case LarFile::DataType::SgnInt:
+//				switch (curr_dsrc_contents.metadata->type_size)
+//				{
+//				case LarFile::TypeSize::Sz8:
+//					cast_and_copy_to_int_temp_dsrc_arr<DdestType, s8>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz16:
+//					cast_and_copy_to_int_temp_dsrc_arr<DdestType, s16>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz32:
+//					cast_and_copy_to_int_temp_dsrc_arr<DdestType, s32>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz64:
+//					cast_and_copy_to_int_temp_dsrc_arr<DdestType, s64>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				}
+//				break;
+//			default:
+//				cast_and_copy_to_int_temp_dsrc_arr<DdestType, BFloat16>
+//					(curr_dsrc_contents, temp_dsrc_arr);
+//				break;
+//			}
+//		};
+//
+//		ASM_COMMENT("integer fill_temp_dsrc_arr(), dsrc0");
+//		fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
+//		ASM_COMMENT("integer fill_temp_dsrc_arr(), dsrc1");
+//		fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
+//
+//		//printout("integer vector op temp dsrc arrs:  \n");
+//		//printout(std::hex);
+//		//for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		//{
+//		//	printout(temp_dsrc0_arr[i], " ");
+//		//}
+//		//printout("\n");
+//		//for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		//{
+//		//	printout(temp_dsrc1_arr[i], " ");
+//		//}
+//		//printout(std::dec, "\n");
+//
+//		if constexpr (sizeof(DdestType) == sizeof(u8))
+//		{
+//			if constexpr (std::is_unsigned<DdestType>())
+//			{
+//				ASM_COMMENT("vector u8 ops");
+//			}
+//			else
+//			{
+//				ASM_COMMENT("vector s8 ops");
+//			}
+//		}
+//		else if constexpr (sizeof(DdestType) == sizeof(u16))
+//		{
+//			if constexpr (std::is_unsigned<DdestType>())
+//			{
+//				ASM_COMMENT("vector u16 ops");
+//			}
+//			else
+//			{
+//				ASM_COMMENT("vector s16 ops");
+//			}
+//		}
+//		else if constexpr (sizeof(DdestType) == sizeof(u32))
+//		{
+//			if constexpr (std::is_unsigned<DdestType>())
+//			{
+//				ASM_COMMENT("vector u32 ops");
+//			}
+//			else
+//			{
+//				ASM_COMMENT("vector s32 ops");
+//			}
+//		}
+//		else // if constexpr (sizeof(DdestType) == sizeof(u64))
+//		{
+//			if constexpr (std::is_unsigned<DdestType>())
+//			{
+//				ASM_COMMENT("vector u64 ops");
+//			}
+//			else
+//			{
+//				ASM_COMMENT("vector s64 ops");
+//			}
+//		}
+//		switch (static_cast<InstrDecoder::Iog0Oper>
+//			(__instr_decoder.oper()))
+//		{
+//		case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+//			ASM_COMMENT("vector add");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_arr[i] = temp_dsrc0_arr[i] + temp_dsrc1_arr[i];
+//			}
+//			break;
+//		case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+//			ASM_COMMENT("vector sub");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_arr[i] = temp_dsrc0_arr[i] - temp_dsrc1_arr[i];
+//			}
+//			break;
+//		case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+//			ASM_COMMENT("vector slt");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_arr[i] = temp_dsrc0_arr[i] < temp_dsrc1_arr[i];
+//			}
+//			break;
+//		case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+//			ASM_COMMENT("vector mul"); 
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_arr[i] = temp_dsrc0_arr[i] * temp_dsrc1_arr[i];
+//			}
+//			break;
+//
+//		//case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+//		//	ASM_COMMENT("vector div");
+//		//	for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		//	{
+//		//		temp_ddest_arr[i] = temp_dsrc0_arr[i] / temp_dsrc1_arr[i];
+//		//	}
+//		//	break;
+//		case InstrDecoder::Iog0Oper::And_ThreeRegs:
+//			ASM_COMMENT("vector and");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_arr[i] = temp_dsrc0_arr[i] & temp_dsrc1_arr[i];
+//			}
+//			break;
+//		case InstrDecoder::Iog0Oper::Orr_ThreeRegs:
+//			ASM_COMMENT("vector orr");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_arr[i] = temp_dsrc0_arr[i] | temp_dsrc1_arr[i];
+//			}
+//			break;
+//		case InstrDecoder::Iog0Oper::Xor_ThreeRegs:
+//			ASM_COMMENT("vector xor");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_arr[i] = temp_dsrc0_arr[i] ^ temp_dsrc1_arr[i];
+//			}
+//			break;
+//
+//		//case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
+//		//	ASM_COMMENT("vector shl");
+//		//	for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		//	{
+//		//		temp_ddest_arr[i] = temp_dsrc0_arr[i] << temp_dsrc1_arr[i];
+//		//	}
+//		//	break;
+//		//case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
+//		//	// This might not be a perfect match to what the hardware
+//		//	// actually does?
+//		//	ASM_COMMENT("vector shr");
+//		//	for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		//	{
+//		//		temp_ddest_arr[i] = temp_dsrc0_arr[i]
+//		//			>> static_cast<u64>(temp_dsrc1_arr[i]);
+//		//	}
+//		//	break;
+//		case InstrDecoder::Iog0Oper::Inv_TwoRegs:
+//			ASM_COMMENT("vector inv");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_arr[i] = ~temp_dsrc0_arr[i];
+//			}
+//			break;
+//		//case InstrDecoder::Iog0Oper::Not_TwoRegs:
+//		//	ASM_COMMENT("vector not");
+//		//	for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		//	{
+//		//		temp_ddest_arr[i] = !temp_dsrc0_arr[i];
+//		//	}
+//		//	break;
+//
+//		case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
+//			ASM_COMMENT("vector addi pc");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_arr[i] = static_cast<DdestType>
+//					(__pc - sizeof(InstrDecoder::Instr))
+//					+ static_cast<DdestType>(__instr_decoder
+//					.signext_imm());
+//			}
+//			break;
+//		case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
+//			ASM_COMMENT("vector addi dsrc0");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_arr[i] = temp_dsrc0_arr[i]
+//					+ static_cast<DdestType>(__instr_decoder
+//					.signext_imm());
+//			}
+//			break;
+//		default:
+//			ASM_COMMENT("default vector op");
+//			break;
+//		}
+//
+//		ASM_COMMENT("after vector ops");
+//
+//		//bool found_nonzero = false;
+//		//for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		//{
+//		//	if (temp_ddest_arr[i] != 0)
+//		//	{
+//		//		found_nonzero = true;
+//		//		break;
+//		//	}
+//		//}
+//		//if (!found_nonzero)
+//		//{
+//		//	printout("Integer vector op:  writing all zeros to destination"
+//		//		" register.\n");
+//		//}
+//
+//		
+//		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		{
+//			if constexpr (sizeof(DdestType) == sizeof(u8))
+//			{
+//				curr_data.set_8((i * sizeof(DdestType)),
+//					temp_ddest_arr[i]);
+//			}
+//			else if constexpr (sizeof(DdestType) == sizeof(u16))
+//			{
+//				curr_data.set_16((i * sizeof(DdestType)),
+//					temp_ddest_arr[i]);
+//			}
+//			else if constexpr (sizeof(DdestType) == sizeof(u32))
+//			{
+//				curr_data.set_32((i * sizeof(DdestType)),
+//					temp_ddest_arr[i]);
+//			}
+//			else if constexpr (sizeof(DdestType) == sizeof(u64))
+//			{
+//				curr_data.set_64((i * sizeof(DdestType)),
+//					temp_ddest_arr[i]);
+//			}
+//		}
+//
+//		ASM_COMMENT("after setting curr_data");
+//	}
+//	else if constexpr (std::is_same<DdestType, BFloat16>())
+//	{
+//		ASM_COMMENT("fegetround()");
+//		const auto old_rounding_mode = fegetround();
+//
+//		ASM_COMMENT("FE_TOWARDZERO");
+//		fesetround(FE_TOWARDZERO);
+//
+//		float temp_ddest_float_arr[TEMP_ARR_SIZE],
+//			temp_dsrc0_float_arr[TEMP_ARR_SIZE],
+//			temp_dsrc1_float_arr[TEMP_ARR_SIZE];
+//
+//		auto fill_temp_dsrc_arr
+//			= [&](const LarFile::RefLarContents& curr_dsrc_contents,
+//			DdestType* temp_dsrc_arr) -> void
+//		{
+//			switch (curr_dsrc_contents.metadata->data_type)
+//			{
+//			case LarFile::DataType::UnsgnInt:
+//				switch (curr_dsrc_contents.metadata->type_size)
+//				{
+//				case LarFile::TypeSize::Sz8:
+//					cast_and_copy_to_bfloat16_temp_dsrc_arr<u8>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz16:
+//					cast_and_copy_to_bfloat16_temp_dsrc_arr<u16>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz32:
+//					cast_and_copy_to_bfloat16_temp_dsrc_arr<u32>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz64:
+//					cast_and_copy_to_bfloat16_temp_dsrc_arr<u64>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				}
+//				break;
+//			case LarFile::DataType::SgnInt:
+//				switch (curr_dsrc_contents.metadata->type_size)
+//				{
+//				case LarFile::TypeSize::Sz8:
+//					cast_and_copy_to_bfloat16_temp_dsrc_arr<s8>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz16:
+//					cast_and_copy_to_bfloat16_temp_dsrc_arr<s16>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz32:
+//					cast_and_copy_to_bfloat16_temp_dsrc_arr<s32>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				case LarFile::TypeSize::Sz64:
+//					cast_and_copy_to_bfloat16_temp_dsrc_arr<s64>
+//						(curr_dsrc_contents, temp_dsrc_arr);
+//					break;
+//				}
+//				break;
+//			default:
+//				cast_and_copy_to_bfloat16_temp_dsrc_arr<BFloat16>
+//					(curr_dsrc_contents, temp_dsrc_arr);
+//				break;
+//			}
+//		};
+//
+//		ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc0");
+//		fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
+//
+//		ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc1");
+//		fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
+//
+//		ASM_COMMENT("fill temp_dsrc_float_arr");
+//		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		{
+//			temp_dsrc0_float_arr[i]
+//				= static_cast<float>(temp_dsrc0_arr[i]);
+//			temp_dsrc1_float_arr[i]
+//				= static_cast<float>(temp_dsrc1_arr[i]);
+//		}
+//
+//		switch (static_cast<InstrDecoder::Iog0Oper>
+//			(__instr_decoder.oper()))
+//		{
+//		case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+//			ASM_COMMENT("vector float add");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
+//					+ temp_dsrc1_float_arr[i];
+//			}
+//			break;
+//		case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+//			ASM_COMMENT("vector float sub");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
+//					- temp_dsrc1_float_arr[i];
+//			}
+//			break;
+//		case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+//			ASM_COMMENT("vector float slt");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
+//					< temp_dsrc1_float_arr[i];
+//			}
+//			break;
+//		case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+//			ASM_COMMENT("vector float mul");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
+//					* temp_dsrc1_float_arr[i];
+//			}
+//			break;
+//
+//		//case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+//		//	ASM_COMMENT("vector float div");
+//		//	for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		//	{
+//		//		temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
+//		//			/ temp_dsrc1_float_arr[i];
+//		//	}
+//		//	break;
+//		default:
+//			ASM_COMMENT("vector float dud");
+//			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//			{
+//				temp_ddest_float_arr[i]  = 0;
+//			}
+//			break;
+//		}
+//
+//		ASM_COMMENT("vector float op copy to temp_ddest_arr");
+//		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		{
+//			temp_ddest_arr[i] = BFloat16(temp_ddest_float_arr[i]);
+//		}
+//
+//		ASM_COMMENT("vector float op copy to curr_data");
+//		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+//		{
+//			curr_data.set_16((i * sizeof(BFloat16)),
+//				temp_ddest_arr[i].data());
+//		}
+//		ASM_COMMENT("fesetround");
+//		fesetround(old_rounding_mode);
+//	}
+//
+//
+//}
+
+
 template<typename DdestType>
-void Simulator::inner_perf_group_0_scalar_op()
+void Simulator::inner_perf_regular_integer_group_0_scalar_op()
 {
-	const auto old_rounding_mode = fegetround();
-	fesetround(FE_TOWARDZERO);
-
-	__curr_ddest_contents.shareddata->dirty = true;
 	auto& curr_data = __curr_ddest_contents.shareddata->data;
-
 
 	DdestType temp_ddest, temp_dsrc0, temp_dsrc1;
 
-	if constexpr (std::is_integral<DdestType>())
+	temp_ddest = 0;
+	auto get_temp_dsrc
+		= [&](const LarFile::RefLarContents& curr_dsrc_contents)
+		-> DdestType
 	{
-		temp_ddest = 0;
-		auto get_temp_dsrc
-			= [&](const LarFile::RefLarContents& curr_dsrc_contents)
-			-> DdestType
+		switch (curr_dsrc_contents.metadata->data_type)
 		{
-			switch (curr_dsrc_contents.metadata->data_type)
-			{
-			case LarFile::DataType::UnsgnInt:
-				return static_cast<DdestType>(curr_dsrc_contents
-					.scalar_data());
-			case LarFile::DataType::SgnInt:
-				return static_cast<DdestType>(curr_dsrc_contents
-					.sgn_scalar_data());
-			//case LarFile::DataType::BFloat16:
-			default:
-				return BFloat16(static_cast<s16>(curr_dsrc_contents
-					.scalar_data())).cast_to_int<DdestType>();
-			}
-		};
+		case LarFile::DataType::UnsgnInt:
+			return static_cast<DdestType>(curr_dsrc_contents
+				.scalar_data());
+		case LarFile::DataType::SgnInt:
+			return static_cast<DdestType>(curr_dsrc_contents
+				.sgn_scalar_data());
+		//case LarFile::DataType::BFloat16:
+		default:
+			return BFloat16(static_cast<s16>(curr_dsrc_contents
+				.scalar_data())).cast_to_int<DdestType>();
+		}
+	};
 
-		temp_dsrc0 = get_temp_dsrc(__curr_dsrc0_contents);
-		temp_dsrc1 = get_temp_dsrc(__curr_dsrc1_contents);
-	}
-	else if constexpr (std::is_same<DdestType, BFloat16>())
-	{
-		temp_ddest = BFloat16();
-		auto get_temp_dsrc
-			= [&](const LarFile::RefLarContents& curr_dsrc_contents)
-			-> DdestType
-		{
-			switch (curr_dsrc_contents.metadata->data_type)
-			{
-			case LarFile::DataType::UnsgnInt:
-				return BFloat16::create_from_int(curr_dsrc_contents
-					.scalar_data());
-			case LarFile::DataType::SgnInt:
-				return BFloat16::create_from_int(curr_dsrc_contents
-					.sgn_scalar_data());
-			//case LarFile::DataType::BFloat16:
-			default:
-				return BFloat16(curr_dsrc_contents.scalar_data());
-			}
-		};
-
-		temp_dsrc0 = get_temp_dsrc(__curr_dsrc0_contents);
-		temp_dsrc1 = get_temp_dsrc(__curr_dsrc1_contents);
-	}
-
+	temp_dsrc0 = get_temp_dsrc(__curr_dsrc0_contents);
+	temp_dsrc1 = get_temp_dsrc(__curr_dsrc1_contents);
 
 	switch (static_cast<InstrDecoder::Iog0Oper>
 		(__instr_decoder.oper()))
 	{
 	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16(float(temp_dsrc0) + float(temp_dsrc1));
-		}
-		else
-		{
-			temp_ddest = temp_dsrc0 + temp_dsrc1;
-		}
+		temp_ddest = temp_dsrc0 + temp_dsrc1;
 		break;
 	case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16(float(temp_dsrc0) - float(temp_dsrc1));
-		}
-		else
-		{
-			temp_ddest = temp_dsrc0 - temp_dsrc1;
-		}
+		temp_ddest = temp_dsrc0 - temp_dsrc1;
 		break;
 	case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16(float(temp_dsrc0
-				< temp_dsrc1));
-		}
-		else
-		{
-			temp_ddest = temp_dsrc0 < temp_dsrc1;
-		}
+		temp_ddest = temp_dsrc0 < temp_dsrc1;
 		break;
 	case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16(float(temp_dsrc0) * float(temp_dsrc1));
-		}
-		else
-		{
-			temp_ddest = temp_dsrc0 * temp_dsrc1;
-		}
+		temp_ddest = temp_dsrc0 * temp_dsrc1;
 		break;
 
-	case InstrDecoder::Iog0Oper::Div_ThreeRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16(float(temp_dsrc0) / float(temp_dsrc1));
-		}
-		else
-		{
-			temp_ddest = temp_dsrc0 / temp_dsrc1;
-		}
-		break;
 	case InstrDecoder::Iog0Oper::And_ThreeRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16();
-		}
-		else
-		{
-			temp_ddest = temp_dsrc0 & temp_dsrc1;
-		}
+		temp_ddest = temp_dsrc0 & temp_dsrc1;
 		break;
 	case InstrDecoder::Iog0Oper::Orr_ThreeRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16();
-		}
-		else
-		{
-			temp_ddest = temp_dsrc0 | temp_dsrc1;
-		}
+		temp_ddest = temp_dsrc0 | temp_dsrc1;
 		break;
 	case InstrDecoder::Iog0Oper::Xor_ThreeRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16();
-		}
-		else
-		{
-			temp_ddest = temp_dsrc0 ^ temp_dsrc1;
-		}
+		temp_ddest = temp_dsrc0 ^ temp_dsrc1;
 		break;
 
-	case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16();
-		}
-		else
-		{
-			temp_ddest = temp_dsrc0 << temp_dsrc1;
-		}
-		break;
-	case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16();
-		}
-		else
-		{
-			// This might not be a perfect match to what the hardware
-			// actually does?
-			temp_ddest = temp_dsrc0 >> static_cast<u64>(temp_dsrc1);
-		}
-		break;
 	case InstrDecoder::Iog0Oper::Inv_TwoRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16();
-		}
-		else
-		{
-			temp_ddest = ~temp_dsrc0;
-		}
-		break;
-	case InstrDecoder::Iog0Oper::Not_TwoRegs:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16();
-		}
-		else
-		{
-			temp_ddest = !temp_dsrc0;
-		}
+		temp_ddest = ~temp_dsrc0;
 		break;
 
 	case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16();
-		}
-		else
-		{
-			temp_ddest = static_cast<DdestType>
-				(__pc - sizeof(InstrDecoder::Instr))
-				+ static_cast<DdestType>(__instr_decoder.signext_imm());
-		}
+		temp_ddest = static_cast<DdestType>
+			(__pc - sizeof(InstrDecoder::Instr))
+			+ static_cast<DdestType>(__instr_decoder.signext_imm());
 		break;
 	case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
-		if constexpr (std::is_same<DdestType, BFloat16>())
-		{
-			temp_ddest = BFloat16();
-		}
-		else
-		{
-			temp_ddest = temp_dsrc0
-				+ static_cast<DdestType>(__instr_decoder.signext_imm());
-		}
+		temp_ddest = temp_dsrc0
+			+ static_cast<DdestType>(__instr_decoder.signext_imm());
 		break;
 	default:
 		break;
 	}
 
-	if constexpr (std::is_same<DdestType, BFloat16>())
+	//printout("regular integer scalar op result:  ",
+	//	std::hex, temp_ddest, std::dec, "\n");
+	if constexpr (std::is_same<DdestType, u8>()
+		|| std::is_same<DdestType, s8>())
+	{
+		curr_data.set_8(__curr_ddest_contents.metadata->data_offset,
+			temp_ddest);
+	}
+	else if constexpr (std::is_same<DdestType, u16>()
+		|| std::is_same<DdestType, s16>())
 	{
 		curr_data.set_16(__curr_ddest_contents.metadata->data_offset,
-			temp_ddest.data());
+			temp_ddest);
 	}
-	else
+	else if constexpr (std::is_same<DdestType, u32>()
+		|| std::is_same<DdestType, s32>())
 	{
+		curr_data.set_32(__curr_ddest_contents.metadata->data_offset,
+			temp_ddest);
+	}
+	else if constexpr (std::is_same<DdestType, u64>()
+		|| std::is_same<DdestType, s64>())
+	{
+		curr_data.set_64(__curr_ddest_contents.metadata->data_offset,
+			temp_ddest);
+	}
+}
+
+template<typename DdestType>
+void Simulator::inner_perf_forced_64_bit_integer_group_0_scalar_op()
+{
+	auto& curr_data = __curr_ddest_contents.shareddata->data;
+
+	DdestType temp_ddest, temp_dsrc0, temp_dsrc1;
+
+	temp_dsrc0 = __curr_dsrc0_contents.forced_64_bit_scalar_data();
+	temp_dsrc1 = __curr_dsrc1_contents.forced_64_bit_scalar_data();
+
+	switch (static_cast<InstrDecoder::Iog0Oper>(__instr_decoder.oper()))
+	{
+	case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+		temp_ddest = temp_dsrc0 / temp_dsrc1;
+		break;
+	case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
+		temp_ddest = temp_dsrc0 << static_cast<u64>(temp_dsrc1);
+		break;
+	case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
+		temp_ddest = temp_dsrc0 >> static_cast<u64>(temp_dsrc1);
+		break;
+	case InstrDecoder::Iog0Oper::Not_TwoRegs:
+		temp_ddest = !temp_dsrc0;
+		break;
+	default:
+		// Eek!
+		temp_ddest = 0;
+		break;
+	}
+
+	curr_data.set_64(__curr_ddest_contents.metadata->data_offset,
+		temp_ddest);
+}
+
+template<typename DdestType>
+void Simulator::inner_perf_regular_integer_group_0_vector_op()
+{
+	auto& curr_data = __curr_ddest_contents.shareddata->data;
+
+	static constexpr size_t TEMP_ARR_SIZE = num_lar_elems<DdestType>();
+
+	std::array<DdestType, TEMP_ARR_SIZE>
+		temp_ddest_arr, temp_dsrc0_arr, temp_dsrc1_arr;
+
+	auto fill_temp_dsrc_arr
+		= [&](const LarFile::RefLarContents& curr_dsrc_contents,
+		DdestType* temp_dsrc_arr) -> void
+	{
+		switch (curr_dsrc_contents.metadata->data_type)
+		{
+		case LarFile::DataType::UnsgnInt:
+			switch (curr_dsrc_contents.metadata->type_size)
+			{
+			case LarFile::TypeSize::Sz8:
+				cast_and_copy_to_int_temp_dsrc_arr<DdestType, u8>
+					(curr_dsrc_contents, temp_dsrc_arr);
+				break;
+			case LarFile::TypeSize::Sz16:
+				cast_and_copy_to_int_temp_dsrc_arr<DdestType, u16>
+					(curr_dsrc_contents, temp_dsrc_arr);
+				break;
+			case LarFile::TypeSize::Sz32:
+				cast_and_copy_to_int_temp_dsrc_arr<DdestType, u32>
+					(curr_dsrc_contents, temp_dsrc_arr);
+				break;
+			case LarFile::TypeSize::Sz64:
+				cast_and_copy_to_int_temp_dsrc_arr<DdestType, u64>
+					(curr_dsrc_contents, temp_dsrc_arr);
+				break;
+			}
+			break;
+		case LarFile::DataType::SgnInt:
+			switch (curr_dsrc_contents.metadata->type_size)
+			{
+			case LarFile::TypeSize::Sz8:
+				cast_and_copy_to_int_temp_dsrc_arr<DdestType, s8>
+					(curr_dsrc_contents, temp_dsrc_arr);
+				break;
+			case LarFile::TypeSize::Sz16:
+				cast_and_copy_to_int_temp_dsrc_arr<DdestType, s16>
+					(curr_dsrc_contents, temp_dsrc_arr);
+				break;
+			case LarFile::TypeSize::Sz32:
+				cast_and_copy_to_int_temp_dsrc_arr<DdestType, s32>
+					(curr_dsrc_contents, temp_dsrc_arr);
+				break;
+			case LarFile::TypeSize::Sz64:
+				cast_and_copy_to_int_temp_dsrc_arr<DdestType, s64>
+					(curr_dsrc_contents, temp_dsrc_arr);
+				break;
+			}
+		case LarFile::DataType::BFloat16:
+			cast_and_copy_to_int_temp_dsrc_arr<DdestType, BFloat16>
+				(curr_dsrc_contents, temp_dsrc_arr);
+			break;
+		}
+	};
+
+	ASM_COMMENT("Integer fill_temp_dsrc_arr(), dsrc0");
+	fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr.data());
+
+	ASM_COMMENT("Integer fill_temp_dsrc_arr(), dsrc1");
+	fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr.data());
+
+	switch (static_cast<InstrDecoder::Iog0Oper>(__instr_decoder.oper()))
+	{
+	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+		ASM_COMMENT("vector integer add");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i] + temp_dsrc1_arr[i];
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+		ASM_COMMENT("vector integer sub");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i] - temp_dsrc1_arr[i];
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+		ASM_COMMENT("vector integer slt");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i] < temp_dsrc1_arr[i];
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+		ASM_COMMENT("vector integer mul");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i] * temp_dsrc1_arr[i];
+		}
+		break;
+
+	case InstrDecoder::Iog0Oper::And_ThreeRegs:
+		ASM_COMMENT("vector integer bitwise and");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i] & temp_dsrc1_arr[i];
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Orr_ThreeRegs:
+		ASM_COMMENT("vector integer bitwise orr");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i] | temp_dsrc1_arr[i];
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Xor_ThreeRegs:
+		ASM_COMMENT("vector integer bitwise xor");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i] ^ temp_dsrc1_arr[i];
+		}
+		break;
+
+	case InstrDecoder::Iog0Oper::Inv_TwoRegs:
+		ASM_COMMENT("vector integer bitwise invert");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = ~temp_dsrc0_arr[i];
+		}
+		break;
+
+	case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
+		ASM_COMMENT("vector integer addi pc");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = static_cast<DdestType>
+				(__pc - sizeof(InstrDecoder::Instr))
+				+ static_cast<DdestType>(__instr_decoder.signext_imm());
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
+		ASM_COMMENT("vector integer addi two regs");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i]
+				+ static_cast<DdestType>(__instr_decoder.signext_imm());
+		}
+		break;
+	default:
+		ASM_COMMENT("vector integer eek");
+		break;
+	}
+
+
+	//printout("regular integer vector op results:  ", std::hex);
+	for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+	{
+		//printout(temp_ddest_arr[i], " ");
 		if constexpr (std::is_same<DdestType, u8>()
 			|| std::is_same<DdestType, s8>())
 		{
-			curr_data.set_8(__curr_ddest_contents.metadata->data_offset,
-				temp_ddest);
+			curr_data.set_8((i * sizeof(DdestType)), temp_ddest_arr[i]);
 		}
 		else if constexpr (std::is_same<DdestType, u16>()
 			|| std::is_same<DdestType, s16>())
 		{
-			curr_data.set_16(__curr_ddest_contents.metadata->data_offset,
-				temp_ddest);
+			curr_data.set_16((i * sizeof(DdestType)), temp_ddest_arr[i]);
 		}
 		else if constexpr (std::is_same<DdestType, u32>()
 			|| std::is_same<DdestType, s32>())
 		{
-			curr_data.set_32(__curr_ddest_contents.metadata->data_offset,
-				temp_ddest);
+			curr_data.set_32((i * sizeof(DdestType)), temp_ddest_arr[i]);
 		}
 		else if constexpr (std::is_same<DdestType, u64>()
 			|| std::is_same<DdestType, s64>())
 		{
-			curr_data.set_64(__curr_ddest_contents.metadata->data_offset,
-				temp_ddest);
+			curr_data.set_64((i * sizeof(DdestType)), temp_ddest_arr[i]);
 		}
 	}
 
-	fesetround(old_rounding_mode);
+	//printout(std::dec, "\n");
 }
 
 template<typename DdestType>
-void Simulator::inner_perf_group_0_vector_op()
+void Simulator::inner_perf_forced_64_bit_integer_group_0_vector_op()
 {
+	auto& curr_data = __curr_ddest_contents.shareddata->data;
 
 	static constexpr size_t TEMP_ARR_SIZE = num_lar_elems<DdestType>();
 
-	DdestType temp_ddest_arr[TEMP_ARR_SIZE], temp_dsrc0_arr[TEMP_ARR_SIZE],
+	std::array<DdestType, TEMP_ARR_SIZE>
+		temp_ddest_arr, temp_dsrc0_arr, temp_dsrc1_arr;
+
+	for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+	{
+		temp_dsrc0_arr[i] = __curr_dsrc0_contents.shareddata->data.get_64
+			(i * sizeof(DdestType));
+	}
+	for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+	{
+		temp_dsrc1_arr[i] = __curr_dsrc1_contents.shareddata->data.get_64
+			(i * sizeof(DdestType));
+	}
+
+	switch (static_cast<InstrDecoder::Iog0Oper>(__instr_decoder.oper()))
+	{
+	case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+		ASM_COMMENT("vector integer div");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i] / temp_dsrc1_arr[i];
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
+		ASM_COMMENT("vector integer shl");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i]
+				<< static_cast<u64>(temp_dsrc1_arr[i]);
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
+		ASM_COMMENT("vector integer shr");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = temp_dsrc0_arr[i]
+				>> static_cast<u64>(temp_dsrc1_arr[i]);
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Not_TwoRegs:
+		ASM_COMMENT("vector integer not");
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = !temp_dsrc0_arr[i];
+		}
+		break;
+	default:
+		ASM_COMMENT("vector integer eek");
+		// Eek!
+		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+		{
+			temp_ddest_arr[i] = 0;
+		}
+		break;
+	}
+
+	ASM_COMMENT("copy to curr_data");
+	for (size_t i=0; i<temp_ddest_arr.size(); ++i)
+	{
+		curr_data.set_64((i * sizeof(DdestType)), temp_ddest_arr[i]);
+	}
+}
+
+
+void Simulator::inner_perf_bfloat16_group_0_scalar_op()
+{
+	ASM_COMMENT("fegetround()");
+	const auto old_rounding_mode = fegetround();
+
+	ASM_COMMENT("FE_TOWARDZERO");
+	fesetround(FE_TOWARDZERO);
+
+
+
+
+	ASM_COMMENT("fesetround");
+	fesetround(old_rounding_mode);
+}
+
+void Simulator::inner_perf_bfloat16_group_0_vector_op()
+{
+	ASM_COMMENT("fegetround()");
+	const auto old_rounding_mode = fegetround();
+
+	ASM_COMMENT("FE_TOWARDZERO");
+	fesetround(FE_TOWARDZERO);
+
+	static constexpr size_t TEMP_ARR_SIZE = num_lar_elems<BFloat16>();
+
+	BFloat16 temp_ddest_arr[TEMP_ARR_SIZE], temp_dsrc0_arr[TEMP_ARR_SIZE],
 		temp_dsrc1_arr[TEMP_ARR_SIZE];
 
-	__curr_ddest_contents.shareddata->dirty = true;
+	float temp_ddest_float_arr[TEMP_ARR_SIZE],
+		temp_dsrc0_float_arr[TEMP_ARR_SIZE],
+		temp_dsrc1_float_arr[TEMP_ARR_SIZE];
 
 	auto& curr_data = __curr_ddest_contents.shareddata->data;
-	if constexpr (std::is_integral<DdestType>())
+
+	auto fill_temp_dsrc_arr
+		= [&](const LarFile::RefLarContents& curr_dsrc_contents,
+		BFloat16* temp_dsrc_arr) -> void
 	{
-		auto fill_temp_dsrc_arr
-			= [&](const LarFile::RefLarContents& curr_dsrc_contents,
-			DdestType* temp_dsrc_arr) -> void
+		switch (curr_dsrc_contents.metadata->data_type)
 		{
-			switch (curr_dsrc_contents.metadata->data_type)
+		case LarFile::DataType::UnsgnInt:
+			switch (curr_dsrc_contents.metadata->type_size)
 			{
-			case LarFile::DataType::UnsgnInt:
-				switch (curr_dsrc_contents.metadata->type_size)
-				{
-				case LarFile::TypeSize::Sz8:
-					cast_and_copy_to_int_temp_dsrc_arr<DdestType, u8>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz16:
-					cast_and_copy_to_int_temp_dsrc_arr<DdestType, u16>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz32:
-					cast_and_copy_to_int_temp_dsrc_arr<DdestType, u32>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz64:
-					cast_and_copy_to_int_temp_dsrc_arr<DdestType, u64>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				}
+			case LarFile::TypeSize::Sz8:
+				cast_and_copy_to_bfloat16_temp_dsrc_arr<u8>
+					(curr_dsrc_contents, temp_dsrc_arr);
 				break;
-			case LarFile::DataType::SgnInt:
-				switch (curr_dsrc_contents.metadata->type_size)
-				{
-				case LarFile::TypeSize::Sz8:
-					cast_and_copy_to_int_temp_dsrc_arr<DdestType, s8>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz16:
-					cast_and_copy_to_int_temp_dsrc_arr<DdestType, s16>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz32:
-					cast_and_copy_to_int_temp_dsrc_arr<DdestType, s32>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz64:
-					cast_and_copy_to_int_temp_dsrc_arr<DdestType, s64>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				}
+			case LarFile::TypeSize::Sz16:
+				cast_and_copy_to_bfloat16_temp_dsrc_arr<u16>
+					(curr_dsrc_contents, temp_dsrc_arr);
 				break;
-			default:
-				cast_and_copy_to_int_temp_dsrc_arr<DdestType, BFloat16>
+			case LarFile::TypeSize::Sz32:
+				cast_and_copy_to_bfloat16_temp_dsrc_arr<u32>
+					(curr_dsrc_contents, temp_dsrc_arr);
+				break;
+			case LarFile::TypeSize::Sz64:
+				cast_and_copy_to_bfloat16_temp_dsrc_arr<u64>
 					(curr_dsrc_contents, temp_dsrc_arr);
 				break;
 			}
-		};
-
-		ASM_COMMENT("integer fill_temp_dsrc_arr(), dsrc0");
-		fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
-		ASM_COMMENT("integer fill_temp_dsrc_arr(), dsrc1");
-		fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
-
-		//printout("integer vector op temp dsrc arrs:  \n");
-		//printout(std::hex);
-		//for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-		//{
-		//	printout(temp_dsrc0_arr[i], " ");
-		//}
-		//printout("\n");
-		//for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-		//{
-		//	printout(temp_dsrc1_arr[i], " ");
-		//}
-		//printout(std::dec, "\n");
-
-		if constexpr (sizeof(DdestType) == sizeof(u8))
-		{
-			if constexpr (std::is_unsigned<DdestType>())
-			{
-				ASM_COMMENT("vector u8 ops");
-			}
-			else
-			{
-				ASM_COMMENT("vector s8 ops");
-			}
-		}
-		else if constexpr (sizeof(DdestType) == sizeof(u16))
-		{
-			if constexpr (std::is_unsigned<DdestType>())
-			{
-				ASM_COMMENT("vector u16 ops");
-			}
-			else
-			{
-				ASM_COMMENT("vector s16 ops");
-			}
-		}
-		else if constexpr (sizeof(DdestType) == sizeof(u32))
-		{
-			if constexpr (std::is_unsigned<DdestType>())
-			{
-				ASM_COMMENT("vector u32 ops");
-			}
-			else
-			{
-				ASM_COMMENT("vector s32 ops");
-			}
-		}
-		else // if constexpr (sizeof(DdestType) == sizeof(u64))
-		{
-			if constexpr (std::is_unsigned<DdestType>())
-			{
-				ASM_COMMENT("vector u64 ops");
-			}
-			else
-			{
-				ASM_COMMENT("vector s64 ops");
-			}
-		}
-		switch (static_cast<InstrDecoder::Iog0Oper>
-			(__instr_decoder.oper()))
-		{
-		case InstrDecoder::Iog0Oper::Add_ThreeRegs:
-			ASM_COMMENT("vector add");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i] + temp_dsrc1_arr[i];
-			}
 			break;
-		case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
-			ASM_COMMENT("vector sub");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+		case LarFile::DataType::SgnInt:
+			switch (curr_dsrc_contents.metadata->type_size)
 			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i] - temp_dsrc1_arr[i];
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
-			ASM_COMMENT("vector slt");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i] < temp_dsrc1_arr[i];
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
-			ASM_COMMENT("vector mul"); 
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i] * temp_dsrc1_arr[i];
-			}
-			break;
-
-		case InstrDecoder::Iog0Oper::Div_ThreeRegs:
-			ASM_COMMENT("vector div");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i] / temp_dsrc1_arr[i];
-			}
-			break;
-		case InstrDecoder::Iog0Oper::And_ThreeRegs:
-			ASM_COMMENT("vector and");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i] & temp_dsrc1_arr[i];
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Orr_ThreeRegs:
-			ASM_COMMENT("vector orr");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i] | temp_dsrc1_arr[i];
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Xor_ThreeRegs:
-			ASM_COMMENT("vector xor");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i] ^ temp_dsrc1_arr[i];
-			}
-			break;
-
-		case InstrDecoder::Iog0Oper::Shl_ThreeRegs:
-			ASM_COMMENT("vector shl");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i] << temp_dsrc1_arr[i];
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Shr_ThreeRegs:
-			// This might not be a perfect match to what the hardware
-			// actually does?
-			ASM_COMMENT("vector shr");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i]
-					>> static_cast<u64>(temp_dsrc1_arr[i]);
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Inv_TwoRegs:
-			ASM_COMMENT("vector inv");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = ~temp_dsrc0_arr[i];
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Not_TwoRegs:
-			ASM_COMMENT("vector not");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = !temp_dsrc0_arr[i];
-			}
-			break;
-
-		case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
-			ASM_COMMENT("vector addi pc");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = static_cast<DdestType>
-					(__pc - sizeof(InstrDecoder::Instr))
-					+ static_cast<DdestType>(__instr_decoder
-					.signext_imm());
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
-			ASM_COMMENT("vector addi dsrc0");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_arr[i] = temp_dsrc0_arr[i]
-					+ static_cast<DdestType>(__instr_decoder
-					.signext_imm());
-			}
-			break;
-		default:
-			ASM_COMMENT("default vector op");
-			break;
-		}
-
-		ASM_COMMENT("after vector ops");
-
-		//bool found_nonzero = false;
-		//for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-		//{
-		//	if (temp_ddest_arr[i] != 0)
-		//	{
-		//		found_nonzero = true;
-		//		break;
-		//	}
-		//}
-		//if (!found_nonzero)
-		//{
-		//	printout("Integer vector op:  writing all zeros to destination"
-		//		" register.\n");
-		//}
-
-		
-		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-		{
-			if constexpr (sizeof(DdestType) == sizeof(u8))
-			{
-				curr_data.set_8((i * sizeof(DdestType)),
-					temp_ddest_arr[i]);
-			}
-			else if constexpr (sizeof(DdestType) == sizeof(u16))
-			{
-				curr_data.set_16((i * sizeof(DdestType)),
-					temp_ddest_arr[i]);
-			}
-			else if constexpr (sizeof(DdestType) == sizeof(u32))
-			{
-				curr_data.set_32((i * sizeof(DdestType)),
-					temp_ddest_arr[i]);
-			}
-			else if constexpr (sizeof(DdestType) == sizeof(u64))
-			{
-				curr_data.set_64((i * sizeof(DdestType)),
-					temp_ddest_arr[i]);
-			}
-		}
-
-		ASM_COMMENT("after setting curr_data");
-	}
-	else if constexpr (std::is_same<DdestType, BFloat16>())
-	{
-		ASM_COMMENT("fegetround()");
-		const auto old_rounding_mode = fegetround();
-
-		ASM_COMMENT("FE_TOWARDZERO");
-		fesetround(FE_TOWARDZERO);
-
-		float temp_ddest_float_arr[TEMP_ARR_SIZE],
-			temp_dsrc0_float_arr[TEMP_ARR_SIZE],
-			temp_dsrc1_float_arr[TEMP_ARR_SIZE];
-
-		auto fill_temp_dsrc_arr
-			= [&](const LarFile::RefLarContents& curr_dsrc_contents,
-			DdestType* temp_dsrc_arr) -> void
-		{
-			switch (curr_dsrc_contents.metadata->data_type)
-			{
-			case LarFile::DataType::UnsgnInt:
-				switch (curr_dsrc_contents.metadata->type_size)
-				{
-				case LarFile::TypeSize::Sz8:
-					cast_and_copy_to_bfloat16_temp_dsrc_arr<u8>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz16:
-					cast_and_copy_to_bfloat16_temp_dsrc_arr<u16>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz32:
-					cast_and_copy_to_bfloat16_temp_dsrc_arr<u32>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz64:
-					cast_and_copy_to_bfloat16_temp_dsrc_arr<u64>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				}
+			case LarFile::TypeSize::Sz8:
+				cast_and_copy_to_bfloat16_temp_dsrc_arr<s8>
+					(curr_dsrc_contents, temp_dsrc_arr);
 				break;
-			case LarFile::DataType::SgnInt:
-				switch (curr_dsrc_contents.metadata->type_size)
-				{
-				case LarFile::TypeSize::Sz8:
-					cast_and_copy_to_bfloat16_temp_dsrc_arr<s8>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz16:
-					cast_and_copy_to_bfloat16_temp_dsrc_arr<s16>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz32:
-					cast_and_copy_to_bfloat16_temp_dsrc_arr<s32>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				case LarFile::TypeSize::Sz64:
-					cast_and_copy_to_bfloat16_temp_dsrc_arr<s64>
-						(curr_dsrc_contents, temp_dsrc_arr);
-					break;
-				}
+			case LarFile::TypeSize::Sz16:
+				cast_and_copy_to_bfloat16_temp_dsrc_arr<s16>
+					(curr_dsrc_contents, temp_dsrc_arr);
 				break;
-			default:
-				cast_and_copy_to_bfloat16_temp_dsrc_arr<BFloat16>
+			case LarFile::TypeSize::Sz32:
+				cast_and_copy_to_bfloat16_temp_dsrc_arr<s32>
+					(curr_dsrc_contents, temp_dsrc_arr);
+				break;
+			case LarFile::TypeSize::Sz64:
+				cast_and_copy_to_bfloat16_temp_dsrc_arr<s64>
 					(curr_dsrc_contents, temp_dsrc_arr);
 				break;
 			}
-		};
-
-		ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc0");
-		fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
-
-		ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc1");
-		fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
-
-		ASM_COMMENT("fill temp_dsrc_float_arr");
-		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-		{
-			temp_dsrc0_float_arr[i]
-				= static_cast<float>(temp_dsrc0_arr[i]);
-			temp_dsrc1_float_arr[i]
-				= static_cast<float>(temp_dsrc1_arr[i]);
-		}
-
-		switch (static_cast<InstrDecoder::Iog0Oper>
-			(__instr_decoder.oper()))
-		{
-		case InstrDecoder::Iog0Oper::Add_ThreeRegs:
-			ASM_COMMENT("vector float add");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
-					+ temp_dsrc1_float_arr[i];
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
-			ASM_COMMENT("vector float sub");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
-					- temp_dsrc1_float_arr[i];
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
-			ASM_COMMENT("vector float slt");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
-					< temp_dsrc1_float_arr[i];
-			}
-			break;
-		case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
-			ASM_COMMENT("vector float mul");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
-					* temp_dsrc1_float_arr[i];
-			}
-			break;
-
-		case InstrDecoder::Iog0Oper::Div_ThreeRegs:
-			ASM_COMMENT("vector float div");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
-					/ temp_dsrc1_float_arr[i];
-			}
 			break;
 		default:
-			ASM_COMMENT("vector float dud");
-			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-			{
-				temp_ddest_float_arr[i]  = 0;
-			}
+			cast_and_copy_to_bfloat16_temp_dsrc_arr<BFloat16>
+				(curr_dsrc_contents, temp_dsrc_arr);
 			break;
 		}
+	};
 
-		ASM_COMMENT("vector float op copy to temp_ddest_arr");
-		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-		{
-			temp_ddest_arr[i] = BFloat16(temp_ddest_float_arr[i]);
-		}
+	ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc0");
+	fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
 
-		ASM_COMMENT("vector float op copy to curr_data");
-		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
-		{
-			curr_data.set_16((i * sizeof(BFloat16)),
-				temp_ddest_arr[i].data());
-		}
-		ASM_COMMENT("fesetround");
-		fesetround(old_rounding_mode);
+	ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc1");
+	fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
+
+	ASM_COMMENT("fill temp_dsrc_float_arr");
+	for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+	{
+		temp_dsrc0_float_arr[i] = static_cast<float>(temp_dsrc0_arr[i]);
+		temp_dsrc1_float_arr[i] = static_cast<float>(temp_dsrc1_arr[i]);
 	}
 
+	switch (static_cast<InstrDecoder::Iog0Oper>(__instr_decoder.oper()))
+	{
+	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+		ASM_COMMENT("vector float add");
+		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+		{
+			temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
+				+ temp_dsrc1_float_arr[i];
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+		ASM_COMMENT("vector float sub");
+		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+		{
+			temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
+				- temp_dsrc1_float_arr[i];
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+		ASM_COMMENT("vector float slt");
+		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+		{
+			temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
+				< temp_dsrc1_float_arr[i];
+		}
+		break;
+	case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+		ASM_COMMENT("vector float mul");
+		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+		{
+			temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
+				* temp_dsrc1_float_arr[i];
+		}
+		break;
 
+	case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+		ASM_COMMENT("vector float div");
+		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+		{
+			temp_ddest_float_arr[i] = temp_dsrc0_float_arr[i]
+				/ temp_dsrc1_float_arr[i];
+		}
+		break;
+	default:
+		ASM_COMMENT("vector float dud");
+		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+		{
+			temp_ddest_float_arr[i]  = 0;
+		}
+		break;
+	}
+
+	ASM_COMMENT("vector float op copy to temp_ddest_arr");
+	for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+	{
+		temp_ddest_arr[i] = BFloat16(temp_ddest_float_arr[i]);
+	}
+
+	ASM_COMMENT("vector float op copy to curr_data");
+	for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
+	{
+		curr_data.set_16((i * sizeof(BFloat16)),
+			temp_ddest_arr[i].data());
+	}
+
+	ASM_COMMENT("fesetround");
+	fesetround(old_rounding_mode);
 }
 
 std::string Simulator::get_reg_name_str(LarFile::RegName some_reg_name)

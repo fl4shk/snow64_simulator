@@ -39,8 +39,8 @@ public:		// enums
 
 	enum class Iog1Oper : u8
 	{
-		Btru_OneRegOneSimm20,
-		Bfal_OneRegOneSimm20,
+		Bnz_OneRegOneSimm20,
+		Bzo_OneRegOneSimm20,
 		Jmp_OneReg,
 		Bad,
 	};

@@ -163,6 +163,11 @@ public:		// classes
 			return 9001;
 		}
 
+		inline u64 forced_64_bit_scalar_data() const
+		{
+			return shareddata->data.get_64(metadata->data_offset);
+		}
+
 		//inline void set_scalar_data(u64 n_scalar_data)
 		//{
 		//	switch (metadata->type_size)

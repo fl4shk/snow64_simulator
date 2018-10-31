@@ -14,7 +14,8 @@ inline Address convert_addr_to_bw_addr(Address to_convert);
 
 
 
-class alignas(32) BasicWord
+//class alignas(32) BasicWord
+class BasicWord
 {
 public:		// constants
 	static constexpr size_t NUM_DATA_ELEMS
