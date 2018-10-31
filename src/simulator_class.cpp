@@ -1882,7 +1882,100 @@ void Simulator::inner_perf_bfloat16_group_0_scalar_op()
 	fesetround(FE_TOWARDZERO);
 
 
+	BFloat16 temp_ddest, temp_dsrc0, temp_dsrc1;
 
+	float temp_ddest_float, temp_dsrc0_float, temp_dsrc1_float;
+
+	auto set_temp_dsrc_scalar
+		= [&](const LarFile::RefLarContents& curr_dsrc_contents,
+		BFloat16& temp_dsrc_scalar) -> void
+	{
+		auto metadata = curr_dsrc_contents.metadata;
+		auto shareddata = curr_dsrc_contents.shareddata;
+		switch (metadata->data_type)
+		{
+		case LarFile::DataType::UnsgnInt:
+			switch (metadata->type_size)
+			{
+			case LarFile::TypeSize::Sz8:
+				temp_dsrc_scalar = BFloat16::create_from_int<u8>
+					(shareddata->data.get_8(metadata->data_offset));
+				break;
+			case LarFile::TypeSize::Sz16:
+				temp_dsrc_scalar = BFloat16::create_from_int<u16>
+					(shareddata->data.get_16(metadata->data_offset));
+				break;
+			case LarFile::TypeSize::Sz32:
+				temp_dsrc_scalar = BFloat16::create_from_int<u32>
+					(shareddata->data.get_32(metadata->data_offset));
+				break;
+			case LarFile::TypeSize::Sz64:
+				temp_dsrc_scalar = BFloat16::create_from_int<u64>
+					(shareddata->data.get_64(metadata->data_offset));
+				break;
+			}
+			break;
+		case LarFile::DataType::SgnInt:
+			switch (metadata->type_size)
+			{
+			case LarFile::TypeSize::Sz8:
+				temp_dsrc_scalar = BFloat16::create_from_int<s8>
+					(shareddata->data.get_8(metadata->data_offset));
+				break;
+			case LarFile::TypeSize::Sz16:
+				temp_dsrc_scalar = BFloat16::create_from_int<s16>
+					(shareddata->data.get_16(metadata->data_offset));
+				break;
+			case LarFile::TypeSize::Sz32:
+				temp_dsrc_scalar = BFloat16::create_from_int<s32>
+					(shareddata->data.get_32(metadata->data_offset));
+				break;
+			case LarFile::TypeSize::Sz64:
+				temp_dsrc_scalar = BFloat16::create_from_int<s64>
+					(shareddata->data.get_64(metadata->data_offset));
+				break;
+			}
+			break;
+		case LarFile::DataType::BFloat16:
+			temp_dsrc_scalar = BFloat16(static_cast<u32>(shareddata->data
+				.get_16(metadata->data_offset)));
+			break;
+		}
+	};
+
+	set_temp_dsrc_scalar(__curr_dsrc0_contents, temp_dsrc0);
+	set_temp_dsrc_scalar(__curr_dsrc1_contents, temp_dsrc1);
+
+
+	temp_dsrc0_float = static_cast<float>(temp_dsrc0);
+	temp_dsrc1_float = static_cast<float>(temp_dsrc1);
+
+	switch (static_cast<InstrDecoder::Iog0Oper>(__instr_decoder.oper()))
+	{
+	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
+		temp_ddest_float = temp_dsrc0_float + temp_dsrc1_float;
+		break;
+	case InstrDecoder::Iog0Oper::Sub_ThreeRegs:
+		temp_ddest_float = temp_dsrc0_float - temp_dsrc1_float;
+		break;
+	case InstrDecoder::Iog0Oper::Slt_ThreeRegs:
+		temp_ddest_float = temp_dsrc0_float < temp_dsrc1_float;
+		break;
+	case InstrDecoder::Iog0Oper::Mul_ThreeRegs:
+		temp_ddest_float = temp_dsrc0_float * temp_dsrc1_float;
+		break;
+	case InstrDecoder::Iog0Oper::Div_ThreeRegs:
+		temp_ddest_float = temp_dsrc0_float / temp_dsrc1_float;
+		break;
+	default:
+		temp_ddest_float = 0;
+		break;
+	}
+
+	temp_ddest = temp_ddest_float;
+
+	__curr_ddest_contents.shareddata->data.set_16(__curr_dsrc0_contents
+		.metadata->data_offset, temp_ddest.data());;
 
 	ASM_COMMENT("fesetround");
 	fesetround(old_rounding_mode);

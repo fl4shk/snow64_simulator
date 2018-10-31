@@ -378,6 +378,13 @@ private:		// functions
 			}
 		}
 	}
+
+	//template<typename DsrcType>
+	//static inline void cast_and_copy_to_bfloat16_temp_dsrc_scalar
+	//	(const LarFile::RefLarContents& curr_dsrc_contents,
+	//	BFloat16& temp_dsrc_scalar)
+	//{
+	//}
 };
 
 } // namespace snow64_simulator
