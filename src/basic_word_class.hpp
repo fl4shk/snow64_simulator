@@ -1,5 +1,5 @@
-#ifndef src__slash__basic_word_class_hpp
-#define src__slash__basic_word_class_hpp
+#ifndef src_basic_word_class_hpp
+#define src_basic_word_class_hpp
 
 // src/basic_word_class.hpp
 
@@ -19,7 +19,7 @@ class BasicWord
 {
 public:		// constants
 	static constexpr size_t NUM_DATA_ELEMS
-		= (1 << constants::lar_file::WIDTH__METADATA_DATA_OFFSET);
+		= (1 << constants::lar_file::WIDTH___METADATA_DATA_OFFSET);
 
 	//static constexpr Address
 	//	shift_amounts[] = {0, 8, 16, 24, 32, 40, 48, 56};
@@ -195,4 +195,4 @@ inline std::ostream& operator << (std::ostream& os,
 	return os;
 }
 
-#endif		// src__slash__basic_word_class_hpp
+#endif		// src_basic_word_class_hpp

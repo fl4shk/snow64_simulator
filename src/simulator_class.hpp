@@ -1,5 +1,5 @@
-#ifndef src__slash__simulator_class_hpp
-#define src__slash__simulator_class_hpp
+#ifndef src_simulator_class_hpp
+#define src_simulator_class_hpp
 
 // src/simulator_class.hpp
 
@@ -28,22 +28,22 @@ public:		// enums
 
 
 private:		// variables
-	LarFile __lar_file;
-	InstrDecoder __instr_decoder;
-	Address __pc = 0;
+	LarFile ___lar_file;
+	InstrDecoder ___instr_decoder;
+	Address ___pc = 0;
 
-	LarFile::RefLarContents __curr_ddest_contents, __curr_dsrc0_contents,
-		__curr_dsrc1_contents;
+	LarFile::RefLarContents ___curr_ddest_contents, ___curr_dsrc0_contents,
+		___curr_dsrc1_contents;
 
 
 
-	InstrDecoder::Instr __curr_instr = 0;
+	InstrDecoder::Instr ___curr_instr = 0;
 
-	std::string __data_filename;
+	std::string ___data_filename;
 
-	size_t __mem_amount_in_bytes = 0, __mem_amount_in_words = 0;
+	size_t ___mem_amount_in_bytes = 0, ___mem_amount_in_words = 0;
 
-	std::unique_ptr<BasicWord[]> __mem;
+	std::unique_ptr<BasicWord[]> ___mem;
 
 
 public:		// functions
@@ -389,4 +389,4 @@ private:		// functions
 
 } // namespace snow64_simulator
 
-#endif		// src__slash__simulator_class_hpp
+#endif		// src_simulator_class_hpp

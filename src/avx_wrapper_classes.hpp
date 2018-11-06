@@ -1,5 +1,5 @@
-#ifndef src__slash__avx_wrapper_classes_hpp
-#define src__slash__avx_wrapper_classes_hpp
+#ifndef src_avx_wrapper_classes_hpp
+#define src_avx_wrapper_classes_hpp
 
 // src/avx_wrapper_classes.hpp
 
@@ -10,17 +10,17 @@ namespace snow64_simulator
 //class Avx256i8
 //{
 //public:		// constants
-//	static constexpr size_t NUM_BYTES__DATA = 256 / 8;
+//	static constexpr size_t NUM_BYTES___DATA = 256 / 8;
 //
 //public:		// variables
-//	__m256i data;
+//	___m256i data;
 //
 //public:		// functions
 //	inline Avx256i8()
 //	{
 //	}
 //
-//	inline Avx256i8(__m256i s_data)
+//	inline Avx256i8(___m256i s_data)
 //		: data(s_data)
 //	{
 //	}
@@ -67,4 +67,4 @@ namespace snow64_simulator
 }
 
 
-#endif		// src__slash__avx_wrapper_classes_hpp
+#endif		// src_avx_wrapper_classes_hpp

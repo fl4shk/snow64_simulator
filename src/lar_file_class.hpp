@@ -1,5 +1,5 @@
-#ifndef src__slash__lar_file_class_hpp
-#define src__slash__lar_file_class_hpp
+#ifndef src_lar_file_class_hpp
+#define src_lar_file_class_hpp
 
 // src/lar_file_class.hpp
 
@@ -42,22 +42,22 @@ public:		// enums and typedefs
 	};
 
 public:		// constants
-	static constexpr size_t ARR_SIZE__NUM_LARS
+	static constexpr size_t ARR_SIZE___NUM_LARS
 		= static_cast<size_t>(RegName::Ddummy);
 
-	static constexpr size_t WIDTH__METADATA_TAG
-		= constants::lar_file::WIDTH__METADATA_TAG;
-	static constexpr size_t WIDTH__METADATA_DATA_OFFSET
-		= constants::lar_file::WIDTH__METADATA_DATA_OFFSET;
-	static constexpr size_t WIDTH__METADATA_DATA_TYPE
-		= constants::lar_file::WIDTH__METADATA_DATA_TYPE;
-	static constexpr size_t WIDTH__METADATA_INT_TYPE_SIZE
-		= constants::lar_file::WIDTH__METADATA_INT_TYPE_SIZE;
+	static constexpr size_t WIDTH___METADATA_TAG
+		= constants::lar_file::WIDTH___METADATA_TAG;
+	static constexpr size_t WIDTH___METADATA_DATA_OFFSET
+		= constants::lar_file::WIDTH___METADATA_DATA_OFFSET;
+	static constexpr size_t WIDTH___METADATA_DATA_TYPE
+		= constants::lar_file::WIDTH___METADATA_DATA_TYPE;
+	static constexpr size_t WIDTH___METADATA_INT_TYPE_SIZE
+		= constants::lar_file::WIDTH___METADATA_INT_TYPE_SIZE;
 
-	static constexpr size_t WIDTH__SHAREDDATA_REF_COUNT
-		= constants::lar_file::WIDTH__SHAREDDATA_REF_COUNT;
-	static constexpr size_t WIDTH__SHAREDDATA_BASE_ADDR
-		= constants::lar_file::WIDTH__SHAREDDATA_BASE_ADDR;
+	static constexpr size_t WIDTH___SHAREDDATA_REF_COUNT
+		= constants::lar_file::WIDTH___SHAREDDATA_REF_COUNT;
+	static constexpr size_t WIDTH___SHAREDDATA_BASE_ADDR
+		= constants::lar_file::WIDTH___SHAREDDATA_BASE_ADDR;
 
 
 public:		// classes
@@ -119,7 +119,7 @@ public:		// classes
 		inline Address full_address() const
 		{
 			Address ret = 0;
-			ret |= (shareddata->base_addr << WIDTH__METADATA_DATA_OFFSET);
+			ret |= (shareddata->base_addr << WIDTH___METADATA_DATA_OFFSET);
 			ret |= metadata->data_offset;
 			return ret;
 		}
@@ -190,10 +190,10 @@ public:		// classes
 
 
 private:		// variables
-	std::array<LarMetadata, ARR_SIZE__NUM_LARS> __lar_metadata;
-	std::array<LarShareddata, ARR_SIZE__NUM_LARS> __lar_shareddata;
-	std::array<u8, ARR_SIZE__NUM_LARS> __lar_tag_stack;
-	u8 __curr_tag_stack_index;
+	std::array<LarMetadata, ARR_SIZE___NUM_LARS> ___lar_metadata;
+	std::array<LarShareddata, ARR_SIZE___NUM_LARS> ___lar_shareddata;
+	std::array<u8, ARR_SIZE___NUM_LARS> ___lar_tag_stack;
+	u8 ___curr_tag_stack_index;
 
 public:		// functions
 	LarFile();
@@ -204,16 +204,16 @@ public:		// functions
 		RefLarContents& ddest_contents, RefLarContents& dsrc0_contents,
 		RefLarContents& dsrc1_contents)
 	{
-		ddest_contents.metadata = &__lar_metadata[ddest_index];
-		ddest_contents.shareddata = &__lar_shareddata[ddest_contents
+		ddest_contents.metadata = &___lar_metadata[ddest_index];
+		ddest_contents.shareddata = &___lar_shareddata[ddest_contents
 			.metadata->tag];
 
-		dsrc0_contents.metadata = &__lar_metadata[dsrc0_index];
-		dsrc0_contents.shareddata = &__lar_shareddata[dsrc0_contents
+		dsrc0_contents.metadata = &___lar_metadata[dsrc0_index];
+		dsrc0_contents.shareddata = &___lar_shareddata[dsrc0_contents
 			.metadata->tag];
 
-		dsrc1_contents.metadata = &__lar_metadata[dsrc1_index];
-		dsrc1_contents.shareddata = &__lar_shareddata[dsrc1_contents
+		dsrc1_contents.metadata = &___lar_metadata[dsrc1_index];
+		dsrc1_contents.shareddata = &___lar_shareddata[dsrc1_contents
 			.metadata->tag];
 	}
 	
@@ -241,8 +241,8 @@ public:		// functions
 private:		// functions
 	inline u8 perf_temp_tag_search(size_t i, Address n_base_addr) const
 	{
-		return (((__lar_shareddata[i].ref_count != 0)
-			&& (__lar_shareddata[i].base_addr == n_base_addr))
+		return (((___lar_shareddata[i].ref_count != 0)
+			&& (___lar_shareddata[i].base_addr == n_base_addr))
 			? i : 0);
 	}
 
@@ -255,15 +255,15 @@ private:		// functions
 
 	inline u8 alloc_tag()
 	{
-		const auto ret = __lar_tag_stack[__curr_tag_stack_index];
-		--__curr_tag_stack_index;
+		const auto ret = ___lar_tag_stack[___curr_tag_stack_index];
+		--___curr_tag_stack_index;
 
 		return ret;
 	}
 	inline void dealloc_tag(u8 old_tag)
 	{
-		++__curr_tag_stack_index;
-		__lar_tag_stack[__curr_tag_stack_index] = old_tag;
+		++___curr_tag_stack_index;
+		___lar_tag_stack[___curr_tag_stack_index] = old_tag;
 	}
 
 	inline void load_from_mem(BasicWord& ret, Address base_addr,
@@ -287,4 +287,4 @@ private:		// functions
 
 } // namespace snow64_simulator
 
-#endif		// src__slash__lar_file_class_hpp
+#endif		// src_lar_file_class_hpp

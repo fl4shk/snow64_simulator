@@ -7,36 +7,36 @@ namespace snow64_simulator
 {
 
 Simulator::Simulator(const std::string& s_data_filename,
-	size_t s_min_mem_amount_in_bytes) : __data_filename(s_data_filename),
-	__mem_amount_in_bytes(s_min_mem_amount_in_bytes)
+	size_t s_min_mem_amount_in_bytes) : ___data_filename(s_data_filename),
+	___mem_amount_in_bytes(s_min_mem_amount_in_bytes)
 {
-	__mem_amount_in_words = __mem_amount_in_bytes
+	___mem_amount_in_words = ___mem_amount_in_bytes
 		/ sizeof(BasicWord);
 
-	if ((__mem_amount_in_words * sizeof(BasicWord))
-		!= __mem_amount_in_bytes)
+	if ((___mem_amount_in_words * sizeof(BasicWord))
+		!= ___mem_amount_in_bytes)
 	{
-		++__mem_amount_in_words;
+		++___mem_amount_in_words;
 	}
 
-	////printout("__data_filename:  ", __data_filename, "\n");
-	//printout("__mem_amount_in_bytes:  ",
-	//	__mem_amount_in_bytes, "\n");
+	////printout("___data_filename:  ", ___data_filename, "\n");
+	//printout("___mem_amount_in_bytes:  ",
+	//	___mem_amount_in_bytes, "\n");
 
-	//printout("__mem_amount_in_words:  ", __mem_amount_in_words,
+	//printout("___mem_amount_in_words:  ", ___mem_amount_in_words,
 	//	"\n");
 
-	__mem.reset(new BasicWord[mem_amount_in_words()]);
+	___mem.reset(new BasicWord[mem_amount_in_words()]);
 
 	for (size_t i=0; i<mem_amount_in_words(); ++i)
 	{
-		__mem[i] = BasicWord();
+		___mem[i] = BasicWord();
 	}
 
 
 	{
 	size_t word_addr = 0;
-	std::ifstream data_ifstream(__data_filename);
+	std::ifstream data_ifstream(___data_filename);
 	std::string line;
 
 	while (!data_ifstream.eof())
@@ -86,7 +86,7 @@ Simulator::Simulator(const std::string& s_data_filename,
 
 			for (size_t i=0; i<BasicWord::NUM_DATA_ELEMS; ++i)
 			{
-				u8& n_data = __mem[word_addr].data[i];
+				u8& n_data = ___mem[word_addr].data[i];
 				n_data = 0;
 
 				for (size_t j=0; j<(sizeof(u8) * 2); ++j)
@@ -123,20 +123,20 @@ Simulator::Simulator(const std::string& s_data_filename,
 	//	for (size_t j=0; j<BasicWord::NUM_DATA_ELEMS; j+=4)
 	//	{
 	//		//u32 temp = 0;
-	//		//set_bits_with_range(temp, __mem[i].data[j + 0], 31, 24);
-	//		//set_bits_with_range(temp, __mem[i].data[j + 1], 23, 16);
-	//		//set_bits_with_range(temp, __mem[i].data[j + 2], 15, 8);
-	//		//set_bits_with_range(temp, __mem[i].data[j + 3], 7, 0);
+	//		//set_bits_with_range(temp, ___mem[i].data[j + 0], 31, 24);
+	//		//set_bits_with_range(temp, ___mem[i].data[j + 1], 23, 16);
+	//		//set_bits_with_range(temp, ___mem[i].data[j + 2], 15, 8);
+	//		//set_bits_with_range(temp, ___mem[i].data[j + 3], 7, 0);
 
-	//		u32 temp = ((__mem[i].data[j + 0] << 0)
-	//			| (__mem[i].data[j + 1] << 8)
-	//			| (__mem[i].data[j + 2] << 16)
-	//			| (__mem[i].data[j + 3] << 24));
+	//		u32 temp = ((___mem[i].data[j + 0] << 0)
+	//			| (___mem[i].data[j + 1] << 8)
+	//			| (___mem[i].data[j + 2] << 16)
+	//			| (___mem[i].data[j + 3] << 24));
 	//		printout(std::hex, temp, std::dec, " ");
 	//	}
 	//	//for (size_t j=0; j<BasicWord::NUM_DATA_ELEMS; ++j)
 	//	//{
-	//	//	printout(std::hex, static_cast<u32>(__mem[i].data[j]),
+	//	//	printout(std::hex, static_cast<u32>(___mem[i].data[j]),
 	//	//		std::dec, " ");
 	//	//}
 
@@ -152,7 +152,7 @@ int Simulator::run()
 {
 	for (;;)
 	{
-		//printout(std::hex, __pc, std::dec, ":  ");
+		//printout(std::hex, ___pc, std::dec, ":  ");
 		perf_instr_fetch();
 		perf_instr_decode();
 
@@ -161,7 +161,7 @@ int Simulator::run()
 			break;
 		}
 
-		//if (__pc > 0x200)
+		//if (___pc > 0x200)
 		//{
 		//	break;
 		//}
@@ -172,64 +172,64 @@ int Simulator::run()
 
 void Simulator::perf_instr_fetch()
 {
-	const auto pc_as_bw_addr = convert_addr_to_bw_addr(__pc);
-	const auto pc_as_bw_instr_index = convert_addr_to_bw_instr_index(__pc);
+	const auto pc_as_bw_addr = convert_addr_to_bw_addr(___pc);
+	const auto pc_as_bw_instr_index = convert_addr_to_bw_instr_index(___pc);
 
 
-	if (get_bits_with_range(__pc, 1, 0) != 0)
+	if (get_bits_with_range(___pc, 1, 0) != 0)
 	{
-		err(sconcat("Program counter value ", std::hex, __pc, std::dec,
+		err(sconcat("Program counter value ", std::hex, ___pc, std::dec,
 			" not aligned to 32 bits!"));
 	}
 
 	if (pc_as_bw_addr >= mem_amount_in_words())
 	{
-		err(sconcat("Program counter value ", std::hex, __pc, std::dec,
+		err(sconcat("Program counter value ", std::hex, ___pc, std::dec,
 			" out of range for amount of allocated memory ",
 			"(", mem_amount_in_words(), "words)!"));
 	}
 
 
-	auto& line_of_instrs = __mem[pc_as_bw_addr];
+	auto& line_of_instrs = ___mem[pc_as_bw_addr];
 
-	__curr_instr = line_of_instrs.get_32(pc_as_bw_instr_index);
+	___curr_instr = line_of_instrs.get_32(pc_as_bw_instr_index);
 	//printout("perf_instr_fetch() debug stuff:  ",
-	//	std::hex, __curr_instr, "; ", __pc, " ", pc_as_bw_addr, " ", 
+	//	std::hex, ___curr_instr, "; ", ___pc, " ", pc_as_bw_addr, " ", 
 	//	pc_as_bw_instr_index, std::dec, "\n");
-	__pc += sizeof(InstrDecoder::Instr);
+	___pc += sizeof(InstrDecoder::Instr);
 }
 
 void Simulator::perf_instr_decode()
 {
-	__instr_decoder.decode(__curr_instr);
+	___instr_decoder.decode(___curr_instr);
 
-	__lar_file.read_from(__instr_decoder.ddest_index(),
-		__instr_decoder.dsrc0_index(), __instr_decoder.dsrc1_index(),
-		__curr_ddest_contents, __curr_dsrc0_contents,
-		__curr_dsrc1_contents);
-
-
+	___lar_file.read_from(___instr_decoder.ddest_index(),
+		___instr_decoder.dsrc0_index(), ___instr_decoder.dsrc1_index(),
+		___curr_ddest_contents, ___curr_dsrc0_contents,
+		___curr_dsrc1_contents);
 
 
-	if (__instr_decoder.nop())
+
+
+	if (___instr_decoder.nop())
 	{
 		return;
 	}
 
 	//std::string&&
 	//	ddest_name = get_reg_name_str(static_cast<LarFile::RegName>
-	//	(__instr_decoder.ddest_index())),
+	//	(___instr_decoder.ddest_index())),
 	//	dsrc0_name = get_reg_name_str(static_cast<LarFile::RegName>
-	//	(__instr_decoder.dsrc0_index())),
+	//	(___instr_decoder.dsrc0_index())),
 	//	dsrc1_name = get_reg_name_str(static_cast<LarFile::RegName>
-	//	(__instr_decoder.dsrc1_index()));
-	//const std::string op_suffix = (!__instr_decoder.op_type()) ? "s" : "v";
+	//	(___instr_decoder.dsrc1_index()));
+	//const std::string op_suffix = (!___instr_decoder.op_type()) ? "s" : "v";
 
-	//switch (__instr_decoder.group())
+	//switch (___instr_decoder.group())
 	//{
 	//case 0:
 	//	switch (static_cast<InstrDecoder::Iog0Oper>
-	//		(__instr_decoder.oper()))
+	//		(___instr_decoder.oper()))
 	//	{
 	//	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
 	//		printout("add" + op_suffix, " ",
@@ -285,17 +285,17 @@ void Simulator::perf_instr_decode()
 	//	case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
 	//		printout("addi" + op_suffix, " ",
 	//			ddest_name, ", pc, ",
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
 	//		printout("addi" + op_suffix, " ",
 	//			ddest_name, ", ", dsrc0_name, ", ",
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog0Oper::SimSyscall_ThreeRegsOneSimm12:
 	//		printout("sim_syscall" + op_suffix, " ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	default:
 	//		printout("eek!\n");
@@ -304,15 +304,15 @@ void Simulator::perf_instr_decode()
 	//	break;
 	//case 1:
 	//	switch (static_cast<InstrDecoder::Iog1Oper>
-	//		(__instr_decoder.oper()))
+	//		(___instr_decoder.oper()))
 	//	{
 	//	case InstrDecoder::Iog1Oper::Bnz_OneRegOneSimm20:
 	//		printout("btru ", ddest_name, ", ",
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog1Oper::Bzo_OneRegOneSimm20:
 	//		printout("bfal ", ddest_name, ", ",
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog1Oper::Jmp_OneReg:
 	//		printout("jmp ", ddest_name);
@@ -324,54 +324,54 @@ void Simulator::perf_instr_decode()
 	//	break;
 	//case 2:
 	//	switch (static_cast<InstrDecoder::Iog2Oper>
-	//		(__instr_decoder.oper()))
+	//		(___instr_decoder.oper()))
 	//	{
 	//	case InstrDecoder::Iog2Oper::LdU8_ThreeRegsOneSimm12:
 	//		printout("ldu8 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog2Oper::LdS8_ThreeRegsOneSimm12:
 	//		printout("lds8 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog2Oper::LdU16_ThreeRegsOneSimm12:
 	//		printout("ldu16 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog2Oper::LdS16_ThreeRegsOneSimm12:
 	//		printout("lds16 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 
 	//	case InstrDecoder::Iog2Oper::LdU32_ThreeRegsOneSimm12:
 	//		printout("ldu32 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog2Oper::LdS32_ThreeRegsOneSimm12:
 	//		printout("lds32 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog2Oper::LdU64_ThreeRegsOneSimm12:
 	//		printout("ldu64 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog2Oper::LdS64_ThreeRegsOneSimm12:
 	//		printout("lds64 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 
 	//	case InstrDecoder::Iog2Oper::LdF16_ThreeRegsOneSimm12:
 	//		printout("ldf16 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	default:
 	//		printout("eek!\n");
@@ -380,54 +380,54 @@ void Simulator::perf_instr_decode()
 	//	break;
 	//case 3:
 	//	switch (static_cast<InstrDecoder::Iog3Oper>
-	//		(__instr_decoder.oper()))
+	//		(___instr_decoder.oper()))
 	//	{
 	//	case InstrDecoder::Iog3Oper::StU8_ThreeRegsOneSimm12:
 	//		printout("stu8 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog3Oper::StS8_ThreeRegsOneSimm12:
 	//		printout("sts8 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog3Oper::StU16_ThreeRegsOneSimm12:
 	//		printout("stu16 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog3Oper::StS16_ThreeRegsOneSimm12:
 	//		printout("sts16 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 
 	//	case InstrDecoder::Iog3Oper::StU32_ThreeRegsOneSimm12:
 	//		printout("stu32 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog3Oper::StS32_ThreeRegsOneSimm12:
 	//		printout("sts32 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog3Oper::StU64_ThreeRegsOneSimm12:
 	//		printout("stu64 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	case InstrDecoder::Iog3Oper::StS64_ThreeRegsOneSimm12:
 	//		printout("sts64 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 
 	//	case InstrDecoder::Iog3Oper::StF16_ThreeRegsOneSimm12:
 	//		printout("stf16 ",
 	//			strappcom(ddest_name, dsrc0_name, dsrc1_name),
-	//			std::hex, __instr_decoder.signext_imm(), std::dec, "\n");
+	//			std::hex, ___instr_decoder.signext_imm(), std::dec, "\n");
 	//		break;
 	//	default:
 	//		printout("eek!\n");
@@ -439,36 +439,36 @@ void Simulator::perf_instr_decode()
 	//}
 	//printout("perf_instr_decode():  lar data:  \n",
 	//	std::hex,
-	//	__curr_ddest_contents.shareddata->data, "\n",
-	//	__curr_dsrc0_contents.shareddata->data, "\n",
-	//	__curr_dsrc1_contents.shareddata->data, "\n",
+	//	___curr_ddest_contents.shareddata->data, "\n",
+	//	___curr_dsrc0_contents.shareddata->data, "\n",
+	//	___curr_dsrc1_contents.shareddata->data, "\n",
 	//	std::dec);
 }
 
 bool Simulator::perf_instr_exec()
 {
-	//printout(__instr_decoder.ddest_index(), "\n");
+	//printout(___instr_decoder.ddest_index(), "\n");
 
-	if (__instr_decoder.nop())
+	if (___instr_decoder.nop())
 	{
 		err(sconcat("Invalid instruction at program counter",
-			std::hex, (__pc - sizeof(InstrDecoder::Instr)), std::dec,
+			std::hex, (___pc - sizeof(InstrDecoder::Instr)), std::dec,
 			"!"));
 	}
 
-	switch (__instr_decoder.group())
+	switch (___instr_decoder.group())
 	{
 	case 0:
 		switch (static_cast<InstrDecoder::Iog0Oper>
-			(__instr_decoder.oper()))
+			(___instr_decoder.oper()))
 		{
 		case InstrDecoder::Iog0Oper::SimSyscall_ThreeRegsOneSimm12:
 			return handle_sim_syscall();
 			break;
 
 		default:
-			__curr_ddest_contents.shareddata->dirty = true;
-			switch (__instr_decoder.op_type())
+			___curr_ddest_contents.shareddata->dirty = true;
+			switch (___instr_decoder.op_type())
 			{
 			case false:
 				perf_group_0_scalar_op();
@@ -483,22 +483,22 @@ bool Simulator::perf_instr_exec()
 
 	case 1:
 		switch (static_cast<InstrDecoder::Iog1Oper>
-			(__instr_decoder.oper()))
+			(___instr_decoder.oper()))
 		{
 		case InstrDecoder::Iog1Oper::Bnz_OneRegOneSimm20:
-			if (__curr_ddest_contents.scalar_data() != 0)
+			if (___curr_ddest_contents.scalar_data() != 0)
 			{
-				__pc += __instr_decoder.signext_imm();
+				___pc += ___instr_decoder.signext_imm();
 			}
 			break;
 		case InstrDecoder::Iog1Oper::Bzo_OneRegOneSimm20:
-			if (__curr_ddest_contents.scalar_data() == 0)
+			if (___curr_ddest_contents.scalar_data() == 0)
 			{
-				__pc += __instr_decoder.signext_imm();
+				___pc += ___instr_decoder.signext_imm();
 			}
 			break;
 		case InstrDecoder::Iog1Oper::Jmp_OneReg:
-			__pc = __curr_ddest_contents.scalar_data();
+			___pc = ___curr_ddest_contents.scalar_data();
 			break;
 		case InstrDecoder::Iog1Oper::Bad:
 			break;
@@ -508,60 +508,60 @@ bool Simulator::perf_instr_exec()
 	case 2:
 	case 3:
 		{
-			Address eff_addr = __curr_dsrc0_contents.full_address()
-				+ __instr_decoder.signext_imm();
+			Address eff_addr = ___curr_dsrc0_contents.full_address()
+				+ ___instr_decoder.signext_imm();
 			//printout("ldst stuff:  ",
 			//	std::hex,
-			//	__curr_dsrc0_contents.full_address(), " ", 
-			//	__instr_decoder.signext_imm(), " ",
+			//	___curr_dsrc0_contents.full_address(), " ", 
+			//	___instr_decoder.signext_imm(), " ",
 			//	eff_addr, " ",
-			//	__curr_dsrc1_contents.scalar_data(),
+			//	___curr_dsrc1_contents.scalar_data(),
 			//	std::dec, "\n");
-			//__curr_dsrc1_contents.scalar_data()
-			switch (__curr_dsrc1_contents.metadata->data_type)
+			//___curr_dsrc1_contents.scalar_data()
+			switch (___curr_dsrc1_contents.metadata->data_type)
 			{
 			case LarFile::DataType::UnsgnInt:
-				switch (__curr_dsrc1_contents.metadata->type_size)
+				switch (___curr_dsrc1_contents.metadata->type_size)
 				{
 				case LarFile::TypeSize::Sz8:
 					eff_addr += static_cast<u64>(static_cast<u8>
-						(__curr_dsrc1_contents.scalar_data()));
+						(___curr_dsrc1_contents.scalar_data()));
 					break;
 				case LarFile::TypeSize::Sz16:
 					eff_addr += static_cast<u64>(static_cast<u16>
-						(__curr_dsrc1_contents.scalar_data()));
+						(___curr_dsrc1_contents.scalar_data()));
 					break;
 				case LarFile::TypeSize::Sz32:
 					eff_addr += static_cast<u64>(static_cast<u32>
-						(__curr_dsrc1_contents.scalar_data()));
+						(___curr_dsrc1_contents.scalar_data()));
 					break;
 				case LarFile::TypeSize::Sz64:
-					eff_addr += __curr_dsrc1_contents.scalar_data();
+					eff_addr += ___curr_dsrc1_contents.scalar_data();
 					break;
 				}
 				break;
 			case LarFile::DataType::SgnInt:
-				switch (__curr_dsrc1_contents.metadata->type_size)
+				switch (___curr_dsrc1_contents.metadata->type_size)
 				{
 				case LarFile::TypeSize::Sz8:
 					eff_addr += static_cast<s64>(static_cast<s8>
-						(__curr_dsrc1_contents.scalar_data()));
+						(___curr_dsrc1_contents.scalar_data()));
 					break;
 				case LarFile::TypeSize::Sz16:
 					eff_addr += static_cast<s64>(static_cast<s16>
-						(__curr_dsrc1_contents.scalar_data()));
+						(___curr_dsrc1_contents.scalar_data()));
 					break;
 				case LarFile::TypeSize::Sz32:
 					eff_addr += static_cast<s64>(static_cast<s32>
-						(__curr_dsrc1_contents.scalar_data()));
+						(___curr_dsrc1_contents.scalar_data()));
 					break;
 				case LarFile::TypeSize::Sz64:
-					eff_addr += __curr_dsrc1_contents.scalar_data();
+					eff_addr += ___curr_dsrc1_contents.scalar_data();
 					break;
 				}
 				break;
 			case LarFile::DataType::BFloat16:
-				eff_addr += BFloat16(static_cast<u16>(__curr_dsrc1_contents
+				eff_addr += BFloat16(static_cast<u16>(___curr_dsrc1_contents
 					.scalar_data())).cast_to_int<s64>();
 				break;
 
@@ -572,7 +572,7 @@ bool Simulator::perf_instr_exec()
 			LarFile::TypeSize n_type_size = LarFile::TypeSize::Sz8;
 
 			switch (static_cast<InstrDecoder::Iog2Oper>
-				(__instr_decoder.oper()))
+				(___instr_decoder.oper()))
 			{
 			case InstrDecoder::Iog2Oper::LdU8_ThreeRegsOneSimm12:
 				n_data_type = LarFile::DataType::UnsgnInt;
@@ -617,9 +617,9 @@ bool Simulator::perf_instr_exec()
 				break;
 			}
 
-			__lar_file.perf_ldst((__instr_decoder.group() == 3),
-				__instr_decoder.ddest_index(), eff_addr, n_data_type,
-				n_type_size, __mem, mem_amount_in_words());
+			___lar_file.perf_ldst((___instr_decoder.group() == 3),
+				___instr_decoder.ddest_index(), eff_addr, n_data_type,
+				n_type_size, ___mem, mem_amount_in_words());
 		}
 		break;
 	}
@@ -629,8 +629,8 @@ bool Simulator::perf_instr_exec()
 bool Simulator::handle_sim_syscall()
 {
 	const LarFile::RegName ddest_index_reg_name
-		= static_cast<LarFile::RegName>(__instr_decoder.ddest_index());
-	switch (static_cast<SyscallType>(__instr_decoder.signext_imm()))
+		= static_cast<LarFile::RegName>(___instr_decoder.ddest_index());
+	switch (static_cast<SyscallType>(___instr_decoder.signext_imm()))
 	{
 	case SyscallType::DispRegs:
 		printout(get_reg_name_str(ddest_index_reg_name),
@@ -639,21 +639,21 @@ bool Simulator::handle_sim_syscall()
 	case SyscallType::DispDdestVectorData:
 		printout(get_reg_name_str(ddest_index_reg_name),
 			" vector data:  ",
-			std::hex, __curr_ddest_contents.shareddata->data, std::dec,
+			std::hex, ___curr_ddest_contents.shareddata->data, std::dec,
 			"\n");
 		break;
 	case SyscallType::DispDdestScalarData:
 		printout(get_reg_name_str(ddest_index_reg_name),
 			" scalar data:  ",
-			std::hex, __curr_ddest_contents.scalar_data(), std::dec,
+			std::hex, ___curr_ddest_contents.scalar_data(), std::dec,
 			//"\n... and vector data:  ",
-			//std::hex, __curr_ddest_contents.shareddata->data, std::dec,
+			//std::hex, ___curr_ddest_contents.shareddata->data, std::dec,
 			"\n");
 		break;
 	case SyscallType::DispDdestAddr:
 		printout(get_reg_name_str(ddest_index_reg_name),
 			" full address:  ",
-			std::hex, __curr_ddest_contents.full_address(), std::dec,
+			std::hex, ___curr_ddest_contents.full_address(), std::dec,
 			"\n");
 		break;
 	case SyscallType::Finish:
@@ -668,16 +668,16 @@ bool Simulator::handle_sim_syscall()
 
 void Simulator::perf_group_0_scalar_op()
 {
-	switch (__curr_ddest_contents.metadata->data_type)
+	switch (___curr_ddest_contents.metadata->data_type)
 	{
 	case LarFile::DataType::UnsgnInt:
-		if (__instr_decoder.forced_64_bit_integers())
+		if (___instr_decoder.forced_64_bit_integers())
 		{
 			inner_perf_forced_64_bit_integer_group_0_scalar_op<u64>();
 		}
 		else
 		{
-			switch (__curr_ddest_contents.metadata->type_size)
+			switch (___curr_ddest_contents.metadata->type_size)
 			{
 			case LarFile::TypeSize::Sz8:
 				inner_perf_regular_integer_group_0_scalar_op<u8>();
@@ -695,13 +695,13 @@ void Simulator::perf_group_0_scalar_op()
 		}
 		break;
 	case LarFile::DataType::SgnInt:
-		if (__instr_decoder.forced_64_bit_integers())
+		if (___instr_decoder.forced_64_bit_integers())
 		{
 			inner_perf_forced_64_bit_integer_group_0_scalar_op<s64>();
 		}
 		else
 		{
-			switch (__curr_ddest_contents.metadata->type_size)
+			switch (___curr_ddest_contents.metadata->type_size)
 			{
 			case LarFile::TypeSize::Sz8:
 				inner_perf_regular_integer_group_0_scalar_op<s8>();
@@ -726,16 +726,16 @@ void Simulator::perf_group_0_scalar_op()
 
 void Simulator::perf_group_0_vector_op()
 {
-	switch (__curr_ddest_contents.metadata->data_type)
+	switch (___curr_ddest_contents.metadata->data_type)
 	{
 	case LarFile::DataType::UnsgnInt:
-		if (__instr_decoder.forced_64_bit_integers())
+		if (___instr_decoder.forced_64_bit_integers())
 		{
 			inner_perf_forced_64_bit_integer_group_0_vector_op<u64>();
 		}
 		else
 		{
-			switch (__curr_ddest_contents.metadata->type_size)
+			switch (___curr_ddest_contents.metadata->type_size)
 			{
 			case LarFile::TypeSize::Sz8:
 				inner_perf_regular_integer_group_0_vector_op<u8>();
@@ -753,13 +753,13 @@ void Simulator::perf_group_0_vector_op()
 		}
 		break;
 	case LarFile::DataType::SgnInt:
-		if (__instr_decoder.forced_64_bit_integers())
+		if (___instr_decoder.forced_64_bit_integers())
 		{
 			inner_perf_forced_64_bit_integer_group_0_vector_op<s64>();
 		}
 		else
 		{
-			switch (__curr_ddest_contents.metadata->type_size)
+			switch (___curr_ddest_contents.metadata->type_size)
 			{
 			case LarFile::TypeSize::Sz8:
 				inner_perf_regular_integer_group_0_vector_op<s8>();
@@ -788,8 +788,8 @@ void Simulator::perf_group_0_vector_op()
 //	const auto old_rounding_mode = fegetround();
 //	fesetround(FE_TOWARDZERO);
 //
-//	__curr_ddest_contents.shareddata->dirty = true;
-//	auto& curr_data = __curr_ddest_contents.shareddata->data;
+//	___curr_ddest_contents.shareddata->dirty = true;
+//	auto& curr_data = ___curr_ddest_contents.shareddata->data;
 //
 //
 //	DdestType temp_ddest, temp_dsrc0, temp_dsrc1;
@@ -816,8 +816,8 @@ void Simulator::perf_group_0_vector_op()
 //			}
 //		};
 //
-//		temp_dsrc0 = get_temp_dsrc(__curr_dsrc0_contents);
-//		temp_dsrc1 = get_temp_dsrc(__curr_dsrc1_contents);
+//		temp_dsrc0 = get_temp_dsrc(___curr_dsrc0_contents);
+//		temp_dsrc1 = get_temp_dsrc(___curr_dsrc1_contents);
 //	}
 //	else if constexpr (std::is_same<DdestType, BFloat16>())
 //	{
@@ -840,13 +840,13 @@ void Simulator::perf_group_0_vector_op()
 //			}
 //		};
 //
-//		temp_dsrc0 = get_temp_dsrc(__curr_dsrc0_contents);
-//		temp_dsrc1 = get_temp_dsrc(__curr_dsrc1_contents);
+//		temp_dsrc0 = get_temp_dsrc(___curr_dsrc0_contents);
+//		temp_dsrc1 = get_temp_dsrc(___curr_dsrc1_contents);
 //	}
 //
 //
 //	switch (static_cast<InstrDecoder::Iog0Oper>
-//		(__instr_decoder.oper()))
+//		(___instr_decoder.oper()))
 //	{
 //	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
 //		if constexpr (std::is_same<DdestType, BFloat16>())
@@ -982,8 +982,8 @@ void Simulator::perf_group_0_vector_op()
 //		else
 //		{
 //			temp_ddest = static_cast<DdestType>
-//				(__pc - sizeof(InstrDecoder::Instr))
-//				+ static_cast<DdestType>(__instr_decoder.signext_imm());
+//				(___pc - sizeof(InstrDecoder::Instr))
+//				+ static_cast<DdestType>(___instr_decoder.signext_imm());
 //		}
 //		break;
 //	case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
@@ -994,7 +994,7 @@ void Simulator::perf_group_0_vector_op()
 //		else
 //		{
 //			temp_ddest = temp_dsrc0
-//				+ static_cast<DdestType>(__instr_decoder.signext_imm());
+//				+ static_cast<DdestType>(___instr_decoder.signext_imm());
 //		}
 //		break;
 //	default:
@@ -1003,7 +1003,7 @@ void Simulator::perf_group_0_vector_op()
 //
 //	if constexpr (std::is_same<DdestType, BFloat16>())
 //	{
-//		curr_data.set_16(__curr_ddest_contents.metadata->data_offset,
+//		curr_data.set_16(___curr_ddest_contents.metadata->data_offset,
 //			temp_ddest.data());
 //	}
 //	else
@@ -1011,25 +1011,25 @@ void Simulator::perf_group_0_vector_op()
 //		if constexpr (std::is_same<DdestType, u8>()
 //			|| std::is_same<DdestType, s8>())
 //		{
-//			curr_data.set_8(__curr_ddest_contents.metadata->data_offset,
+//			curr_data.set_8(___curr_ddest_contents.metadata->data_offset,
 //				temp_ddest);
 //		}
 //		else if constexpr (std::is_same<DdestType, u16>()
 //			|| std::is_same<DdestType, s16>())
 //		{
-//			curr_data.set_16(__curr_ddest_contents.metadata->data_offset,
+//			curr_data.set_16(___curr_ddest_contents.metadata->data_offset,
 //				temp_ddest);
 //		}
 //		else if constexpr (std::is_same<DdestType, u32>()
 //			|| std::is_same<DdestType, s32>())
 //		{
-//			curr_data.set_32(__curr_ddest_contents.metadata->data_offset,
+//			curr_data.set_32(___curr_ddest_contents.metadata->data_offset,
 //				temp_ddest);
 //		}
 //		else if constexpr (std::is_same<DdestType, u64>()
 //			|| std::is_same<DdestType, s64>())
 //		{
-//			curr_data.set_64(__curr_ddest_contents.metadata->data_offset,
+//			curr_data.set_64(___curr_ddest_contents.metadata->data_offset,
 //				temp_ddest);
 //		}
 //	}
@@ -1046,9 +1046,9 @@ void Simulator::perf_group_0_vector_op()
 //	DdestType temp_ddest_arr[TEMP_ARR_SIZE], temp_dsrc0_arr[TEMP_ARR_SIZE],
 //		temp_dsrc1_arr[TEMP_ARR_SIZE];
 //
-//	__curr_ddest_contents.shareddata->dirty = true;
+//	___curr_ddest_contents.shareddata->dirty = true;
 //
-//	auto& curr_data = __curr_ddest_contents.shareddata->data;
+//	auto& curr_data = ___curr_ddest_contents.shareddata->data;
 //	if constexpr (std::is_integral<DdestType>())
 //	{
 //		auto fill_temp_dsrc_arr
@@ -1107,9 +1107,9 @@ void Simulator::perf_group_0_vector_op()
 //		};
 //
 //		ASM_COMMENT("integer fill_temp_dsrc_arr(), dsrc0");
-//		fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
+//		fill_temp_dsrc_arr(___curr_dsrc0_contents, temp_dsrc0_arr);
 //		ASM_COMMENT("integer fill_temp_dsrc_arr(), dsrc1");
-//		fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
+//		fill_temp_dsrc_arr(___curr_dsrc1_contents, temp_dsrc1_arr);
 //
 //		//printout("integer vector op temp dsrc arrs:  \n");
 //		//printout(std::hex);
@@ -1169,7 +1169,7 @@ void Simulator::perf_group_0_vector_op()
 //			}
 //		}
 //		switch (static_cast<InstrDecoder::Iog0Oper>
-//			(__instr_decoder.oper()))
+//			(___instr_decoder.oper()))
 //		{
 //		case InstrDecoder::Iog0Oper::Add_ThreeRegs:
 //			ASM_COMMENT("vector add");
@@ -1266,8 +1266,8 @@ void Simulator::perf_group_0_vector_op()
 //			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 //			{
 //				temp_ddest_arr[i] = static_cast<DdestType>
-//					(__pc - sizeof(InstrDecoder::Instr))
-//					+ static_cast<DdestType>(__instr_decoder
+//					(___pc - sizeof(InstrDecoder::Instr))
+//					+ static_cast<DdestType>(___instr_decoder
 //					.signext_imm());
 //			}
 //			break;
@@ -1276,7 +1276,7 @@ void Simulator::perf_group_0_vector_op()
 //			for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
 //			{
 //				temp_ddest_arr[i] = temp_dsrc0_arr[i]
-//					+ static_cast<DdestType>(__instr_decoder
+//					+ static_cast<DdestType>(___instr_decoder
 //					.signext_imm());
 //			}
 //			break;
@@ -1397,10 +1397,10 @@ void Simulator::perf_group_0_vector_op()
 //		};
 //
 //		ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc0");
-//		fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
+//		fill_temp_dsrc_arr(___curr_dsrc0_contents, temp_dsrc0_arr);
 //
 //		ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc1");
-//		fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
+//		fill_temp_dsrc_arr(___curr_dsrc1_contents, temp_dsrc1_arr);
 //
 //		ASM_COMMENT("fill temp_dsrc_float_arr");
 //		for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
@@ -1412,7 +1412,7 @@ void Simulator::perf_group_0_vector_op()
 //		}
 //
 //		switch (static_cast<InstrDecoder::Iog0Oper>
-//			(__instr_decoder.oper()))
+//			(___instr_decoder.oper()))
 //		{
 //		case InstrDecoder::Iog0Oper::Add_ThreeRegs:
 //			ASM_COMMENT("vector float add");
@@ -1487,7 +1487,7 @@ void Simulator::perf_group_0_vector_op()
 template<typename DdestType>
 void Simulator::inner_perf_regular_integer_group_0_scalar_op()
 {
-	auto& curr_data = __curr_ddest_contents.shareddata->data;
+	auto& curr_data = ___curr_ddest_contents.shareddata->data;
 
 	DdestType temp_ddest, temp_dsrc0, temp_dsrc1;
 
@@ -1511,11 +1511,11 @@ void Simulator::inner_perf_regular_integer_group_0_scalar_op()
 		}
 	};
 
-	temp_dsrc0 = get_temp_dsrc(__curr_dsrc0_contents);
-	temp_dsrc1 = get_temp_dsrc(__curr_dsrc1_contents);
+	temp_dsrc0 = get_temp_dsrc(___curr_dsrc0_contents);
+	temp_dsrc1 = get_temp_dsrc(___curr_dsrc1_contents);
 
 	switch (static_cast<InstrDecoder::Iog0Oper>
-		(__instr_decoder.oper()))
+		(___instr_decoder.oper()))
 	{
 	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
 		temp_ddest = temp_dsrc0 + temp_dsrc1;
@@ -1546,12 +1546,12 @@ void Simulator::inner_perf_regular_integer_group_0_scalar_op()
 
 	case InstrDecoder::Iog0Oper::Addi_OneRegOnePcOneSimm12:
 		temp_ddest = static_cast<DdestType>
-			(__pc - sizeof(InstrDecoder::Instr))
-			+ static_cast<DdestType>(__instr_decoder.signext_imm());
+			(___pc - sizeof(InstrDecoder::Instr))
+			+ static_cast<DdestType>(___instr_decoder.signext_imm());
 		break;
 	case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
 		temp_ddest = temp_dsrc0
-			+ static_cast<DdestType>(__instr_decoder.signext_imm());
+			+ static_cast<DdestType>(___instr_decoder.signext_imm());
 		break;
 	default:
 		break;
@@ -1562,25 +1562,25 @@ void Simulator::inner_perf_regular_integer_group_0_scalar_op()
 	if constexpr (std::is_same<DdestType, u8>()
 		|| std::is_same<DdestType, s8>())
 	{
-		curr_data.set_8(__curr_ddest_contents.metadata->data_offset,
+		curr_data.set_8(___curr_ddest_contents.metadata->data_offset,
 			temp_ddest);
 	}
 	else if constexpr (std::is_same<DdestType, u16>()
 		|| std::is_same<DdestType, s16>())
 	{
-		curr_data.set_16(__curr_ddest_contents.metadata->data_offset,
+		curr_data.set_16(___curr_ddest_contents.metadata->data_offset,
 			temp_ddest);
 	}
 	else if constexpr (std::is_same<DdestType, u32>()
 		|| std::is_same<DdestType, s32>())
 	{
-		curr_data.set_32(__curr_ddest_contents.metadata->data_offset,
+		curr_data.set_32(___curr_ddest_contents.metadata->data_offset,
 			temp_ddest);
 	}
 	else if constexpr (std::is_same<DdestType, u64>()
 		|| std::is_same<DdestType, s64>())
 	{
-		curr_data.set_64(__curr_ddest_contents.metadata->data_offset,
+		curr_data.set_64(___curr_ddest_contents.metadata->data_offset,
 			temp_ddest);
 	}
 }
@@ -1588,14 +1588,14 @@ void Simulator::inner_perf_regular_integer_group_0_scalar_op()
 template<typename DdestType>
 void Simulator::inner_perf_forced_64_bit_integer_group_0_scalar_op()
 {
-	auto& curr_data = __curr_ddest_contents.shareddata->data;
+	auto& curr_data = ___curr_ddest_contents.shareddata->data;
 
 	DdestType temp_ddest, temp_dsrc0, temp_dsrc1;
 
-	temp_dsrc0 = __curr_dsrc0_contents.forced_64_bit_scalar_data();
-	temp_dsrc1 = __curr_dsrc1_contents.forced_64_bit_scalar_data();
+	temp_dsrc0 = ___curr_dsrc0_contents.forced_64_bit_scalar_data();
+	temp_dsrc1 = ___curr_dsrc1_contents.forced_64_bit_scalar_data();
 
-	switch (static_cast<InstrDecoder::Iog0Oper>(__instr_decoder.oper()))
+	switch (static_cast<InstrDecoder::Iog0Oper>(___instr_decoder.oper()))
 	{
 	case InstrDecoder::Iog0Oper::Div_ThreeRegs:
 		temp_ddest = temp_dsrc0 / temp_dsrc1;
@@ -1615,14 +1615,14 @@ void Simulator::inner_perf_forced_64_bit_integer_group_0_scalar_op()
 		break;
 	}
 
-	curr_data.set_64(__curr_ddest_contents.metadata->data_offset,
+	curr_data.set_64(___curr_ddest_contents.metadata->data_offset,
 		temp_ddest);
 }
 
 template<typename DdestType>
 void Simulator::inner_perf_regular_integer_group_0_vector_op()
 {
-	auto& curr_data = __curr_ddest_contents.shareddata->data;
+	auto& curr_data = ___curr_ddest_contents.shareddata->data;
 
 	static constexpr size_t TEMP_ARR_SIZE = num_lar_elems<DdestType>();
 
@@ -1684,12 +1684,12 @@ void Simulator::inner_perf_regular_integer_group_0_vector_op()
 	};
 
 	ASM_COMMENT("Integer fill_temp_dsrc_arr(), dsrc0");
-	fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr.data());
+	fill_temp_dsrc_arr(___curr_dsrc0_contents, temp_dsrc0_arr.data());
 
 	ASM_COMMENT("Integer fill_temp_dsrc_arr(), dsrc1");
-	fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr.data());
+	fill_temp_dsrc_arr(___curr_dsrc1_contents, temp_dsrc1_arr.data());
 
-	switch (static_cast<InstrDecoder::Iog0Oper>(__instr_decoder.oper()))
+	switch (static_cast<InstrDecoder::Iog0Oper>(___instr_decoder.oper()))
 	{
 	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
 		ASM_COMMENT("vector integer add");
@@ -1755,8 +1755,8 @@ void Simulator::inner_perf_regular_integer_group_0_vector_op()
 		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
 		{
 			temp_ddest_arr[i] = static_cast<DdestType>
-				(__pc - sizeof(InstrDecoder::Instr))
-				+ static_cast<DdestType>(__instr_decoder.signext_imm());
+				(___pc - sizeof(InstrDecoder::Instr))
+				+ static_cast<DdestType>(___instr_decoder.signext_imm());
 		}
 		break;
 	case InstrDecoder::Iog0Oper::Addi_TwoRegsOneSimm12:
@@ -1764,7 +1764,7 @@ void Simulator::inner_perf_regular_integer_group_0_vector_op()
 		for (size_t i=0; i<temp_ddest_arr.size(); ++i)
 		{
 			temp_ddest_arr[i] = temp_dsrc0_arr[i]
-				+ static_cast<DdestType>(__instr_decoder.signext_imm());
+				+ static_cast<DdestType>(___instr_decoder.signext_imm());
 		}
 		break;
 	default:
@@ -1805,7 +1805,7 @@ void Simulator::inner_perf_regular_integer_group_0_vector_op()
 template<typename DdestType>
 void Simulator::inner_perf_forced_64_bit_integer_group_0_vector_op()
 {
-	auto& curr_data = __curr_ddest_contents.shareddata->data;
+	auto& curr_data = ___curr_ddest_contents.shareddata->data;
 
 	static constexpr size_t TEMP_ARR_SIZE = num_lar_elems<DdestType>();
 
@@ -1814,16 +1814,16 @@ void Simulator::inner_perf_forced_64_bit_integer_group_0_vector_op()
 
 	for (size_t i=0; i<temp_ddest_arr.size(); ++i)
 	{
-		temp_dsrc0_arr[i] = __curr_dsrc0_contents.shareddata->data.get_64
+		temp_dsrc0_arr[i] = ___curr_dsrc0_contents.shareddata->data.get_64
 			(i * sizeof(DdestType));
 	}
 	for (size_t i=0; i<temp_ddest_arr.size(); ++i)
 	{
-		temp_dsrc1_arr[i] = __curr_dsrc1_contents.shareddata->data.get_64
+		temp_dsrc1_arr[i] = ___curr_dsrc1_contents.shareddata->data.get_64
 			(i * sizeof(DdestType));
 	}
 
-	switch (static_cast<InstrDecoder::Iog0Oper>(__instr_decoder.oper()))
+	switch (static_cast<InstrDecoder::Iog0Oper>(___instr_decoder.oper()))
 	{
 	case InstrDecoder::Iog0Oper::Div_ThreeRegs:
 		ASM_COMMENT("vector integer div");
@@ -1943,14 +1943,14 @@ void Simulator::inner_perf_bfloat16_group_0_scalar_op()
 		}
 	};
 
-	set_temp_dsrc_scalar(__curr_dsrc0_contents, temp_dsrc0);
-	set_temp_dsrc_scalar(__curr_dsrc1_contents, temp_dsrc1);
+	set_temp_dsrc_scalar(___curr_dsrc0_contents, temp_dsrc0);
+	set_temp_dsrc_scalar(___curr_dsrc1_contents, temp_dsrc1);
 
 
 	temp_dsrc0_float = static_cast<float>(temp_dsrc0);
 	temp_dsrc1_float = static_cast<float>(temp_dsrc1);
 
-	switch (static_cast<InstrDecoder::Iog0Oper>(__instr_decoder.oper()))
+	switch (static_cast<InstrDecoder::Iog0Oper>(___instr_decoder.oper()))
 	{
 	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
 		temp_ddest_float = temp_dsrc0_float + temp_dsrc1_float;
@@ -1974,7 +1974,7 @@ void Simulator::inner_perf_bfloat16_group_0_scalar_op()
 
 	temp_ddest = temp_ddest_float;
 
-	__curr_ddest_contents.shareddata->data.set_16(__curr_dsrc0_contents
+	___curr_ddest_contents.shareddata->data.set_16(___curr_dsrc0_contents
 		.metadata->data_offset, temp_ddest.data());;
 
 	ASM_COMMENT("fesetround");
@@ -1998,7 +1998,7 @@ void Simulator::inner_perf_bfloat16_group_0_vector_op()
 		temp_dsrc0_float_arr[TEMP_ARR_SIZE],
 		temp_dsrc1_float_arr[TEMP_ARR_SIZE];
 
-	auto& curr_data = __curr_ddest_contents.shareddata->data;
+	auto& curr_data = ___curr_ddest_contents.shareddata->data;
 
 	auto fill_temp_dsrc_arr
 		= [&](const LarFile::RefLarContents& curr_dsrc_contents,
@@ -2056,10 +2056,10 @@ void Simulator::inner_perf_bfloat16_group_0_vector_op()
 	};
 
 	ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc0");
-	fill_temp_dsrc_arr(__curr_dsrc0_contents, temp_dsrc0_arr);
+	fill_temp_dsrc_arr(___curr_dsrc0_contents, temp_dsrc0_arr);
 
 	ASM_COMMENT("BFloat16 fill_temp_dsrc_arr(), dsrc1");
-	fill_temp_dsrc_arr(__curr_dsrc1_contents, temp_dsrc1_arr);
+	fill_temp_dsrc_arr(___curr_dsrc1_contents, temp_dsrc1_arr);
 
 	ASM_COMMENT("fill temp_dsrc_float_arr");
 	for (size_t i=0; i<TEMP_ARR_SIZE; ++i)
@@ -2068,7 +2068,7 @@ void Simulator::inner_perf_bfloat16_group_0_vector_op()
 		temp_dsrc1_float_arr[i] = static_cast<float>(temp_dsrc1_arr[i]);
 	}
 
-	switch (static_cast<InstrDecoder::Iog0Oper>(__instr_decoder.oper()))
+	switch (static_cast<InstrDecoder::Iog0Oper>(___instr_decoder.oper()))
 	{
 	case InstrDecoder::Iog0Oper::Add_ThreeRegs:
 		ASM_COMMENT("vector float add");
