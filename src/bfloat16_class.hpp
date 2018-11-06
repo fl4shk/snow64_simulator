@@ -47,7 +47,7 @@ public:		// classes
 
 
 private:		// variables
-	u16 ___data = 0;
+	u16 __data = 0;
 
 public:		// functions
 	inline BFloat16()
@@ -450,11 +450,11 @@ public:		// functions
 
 	inline bool sign() const
 	{
-		return get_bits_with_range(___data, bit_pos_sign_h, bit_pos_sign_l);
+		return get_bits_with_range(__data, bit_pos_sign_h, bit_pos_sign_l);
 	}
 	inline bool set_sign(bool n_sign)
 	{
-		clear_and_set_bits(___data, n_sign, bit_pos_sign_h, bit_pos_sign_l);
+		clear_and_set_bits(__data, n_sign, bit_pos_sign_h, bit_pos_sign_l);
 		return sign();
 	}
 	inline u32 enc_exp() const
@@ -468,7 +468,7 @@ public:		// functions
 	}
 	inline u32 set_enc_exp(u32 n_enc_exp)
 	{
-		clear_and_set_bits(___data, n_enc_exp,
+		clear_and_set_bits(__data, n_enc_exp,
 			bit_pos_enc_exp_h, bit_pos_enc_exp_l);
 		return enc_exp();
 	}
@@ -487,12 +487,12 @@ public:		// functions
 	//}
 	inline u32 enc_mantissa() const
 	{
-		return get_bits_with_range(___data, bit_pos_enc_mantissa_h,
+		return get_bits_with_range(__data, bit_pos_enc_mantissa_h,
 			bit_pos_enc_mantissa_l);
 	}
 	inline u32 set_enc_mantissa(u32 n_enc_mantissa)
 	{
-		clear_and_set_bits(___data, n_enc_mantissa, bit_pos_enc_mantissa_h,
+		clear_and_set_bits(__data, n_enc_mantissa, bit_pos_enc_mantissa_h,
 			bit_pos_enc_mantissa_l);
 		return enc_mantissa();
 	}

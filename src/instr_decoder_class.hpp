@@ -78,13 +78,13 @@ public:		// enums
 	};
 
 private:		// variables
-	u8 ___group = 0;
-	u8 ___oper = 0;
-	u8 ___ddest_index = 0, ___dsrc0_index = 0, ___dsrc1_index = 0;
-	s64 ___signext_imm = 0;
-	bool ___op_type = false;
-	bool ___nop = false;
-	bool ___forced_64_bit_integers = false;
+	u8 __group = 0;
+	u8 __oper = 0;
+	u8 __ddest_index = 0, __dsrc0_index = 0, __dsrc1_index = 0;
+	s64 __signext_imm = 0;
+	bool __op_type = false;
+	bool __nop = false;
+	bool __forced_64_bit_integers = false;
 
 
 public:		// functions
@@ -106,27 +106,27 @@ public:		// functions
 private:		// functions
 	inline void update_signext_imm(Instr to_decode, size_t msb_pos)
 	{
-		___signext_imm = get_bits_with_range(to_decode, msb_pos, 0);
-		if (get_bits_with_range(___signext_imm, msb_pos, msb_pos))
+		__signext_imm = get_bits_with_range(to_decode, msb_pos, 0);
+		if (get_bits_with_range(__signext_imm, msb_pos, msb_pos))
 		{
-			set_bits_with_range(___signext_imm,
-				static_cast<decltype(___signext_imm)>(-1),
-				WIDTH2MP(sizeof(___signext_imm) * 8), (msb_pos + 1));
+			set_bits_with_range(__signext_imm,
+				static_cast<decltype(__signext_imm)>(-1),
+				WIDTH2MP(sizeof(__signext_imm) * 8), (msb_pos + 1));
 		}
 	}
 
 	inline void update_ddest_index(Instr to_decode)
 	{
-		___ddest_index = get_bits_with_range(to_decode, 27, 24);
+		__ddest_index = get_bits_with_range(to_decode, 27, 24);
 	}
 
 	inline void update_dsrc0_index(Instr to_decode)
 	{
-		___dsrc0_index = get_bits_with_range(to_decode, 23, 20);
+		__dsrc0_index = get_bits_with_range(to_decode, 23, 20);
 	}
 	inline void update_dsrc1_index(Instr to_decode)
 	{
-		___dsrc1_index = get_bits_with_range(to_decode, 19, 16);
+		__dsrc1_index = get_bits_with_range(to_decode, 19, 16);
 	}
 
 };

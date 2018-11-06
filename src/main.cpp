@@ -28,16 +28,16 @@ int main(int argc, char** argv)
 //	const int old_rounding_mode = fegetround();
 //	fesetround(FE_TOWARDZERO);
 //
-//	static constexpr size_t ARR_SIZE___TEST_VECTORIZED_FLOAT = 16;
-//	std::array<u32, ARR_SIZE___TEST_VECTORIZED_FLOAT>
+//	static constexpr size_t ARR_SIZE__TEST_VECTORIZED_FLOAT = 16;
+//	std::array<u32, ARR_SIZE__TEST_VECTORIZED_FLOAT>
 //		arr_a_u32, arr_b_u32, arr_c_u32;
 //
-//	std::array<u16, ARR_SIZE___TEST_VECTORIZED_FLOAT>
+//	std::array<u16, ARR_SIZE__TEST_VECTORIZED_FLOAT>
 //		arr_a_u16, arr_b_u16, arr_c_u16;
-//	std::array<BFloat16, ARR_SIZE___TEST_VECTORIZED_FLOAT>
+//	std::array<BFloat16, ARR_SIZE__TEST_VECTORIZED_FLOAT>
 //		arr_a_bfloat16, arr_b_bfloat16, arr_c_bfloat16;
 //
-//	std::array<float, ARR_SIZE___TEST_VECTORIZED_FLOAT>
+//	std::array<float, ARR_SIZE__TEST_VECTORIZED_FLOAT>
 //		arr_a_float, arr_b_float, arr_c_float;
 //
 //	liborangepower::time::Prng prng;
@@ -123,7 +123,7 @@ int main(int argc, char** argv)
 //	const int old_rounding_mode = fegetround();
 //	fesetround(FE_TOWARDZERO);
 //
-//	static constexpr size_t ARR_SIZE___TEST_VECTORIZED_FLOAT = 16;
+//	static constexpr size_t ARR_SIZE__TEST_VECTORIZED_FLOAT = 16;
 //
 //	//#define OP +
 //	//#define OP -
@@ -131,12 +131,12 @@ int main(int argc, char** argv)
 //	//#define OP /
 //	#define OP <
 //
-//	std::array<BFloat16, ARR_SIZE___TEST_VECTORIZED_FLOAT>
+//	std::array<BFloat16, ARR_SIZE__TEST_VECTORIZED_FLOAT>
 //		arr_b_bfloat16, results_bfloat16;
-//	std::array<float, ARR_SIZE___TEST_VECTORIZED_FLOAT>
+//	std::array<float, ARR_SIZE__TEST_VECTORIZED_FLOAT>
 //		arr_b_float, results_float;
 //
-//	std::array<bool, ARR_SIZE___TEST_VECTORIZED_FLOAT>
+//	std::array<bool, ARR_SIZE__TEST_VECTORIZED_FLOAT>
 //		results_slt_bfloat16, results_slt_float;
 //
 //	for (size_t i=0; i<BFloat16::num_bfloat16s; ++i)

@@ -19,7 +19,7 @@ class BasicWord
 {
 public:		// constants
 	static constexpr size_t NUM_DATA_ELEMS
-		= (1 << constants::lar_file::WIDTH___METADATA_DATA_OFFSET);
+		= (1 << constants::lar_file::WIDTH__METADATA_DATA_OFFSET);
 
 	//static constexpr Address
 	//	shift_amounts[] = {0, 8, 16, 24, 32, 40, 48, 56};

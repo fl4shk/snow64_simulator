@@ -6,11 +6,11 @@ namespace snow64_simulator
 
 LarFile::LarFile()
 {
-	for (size_t i=0; i<___lar_tag_stack.size(); ++i)
+	for (size_t i=0; i<__lar_tag_stack.size(); ++i)
 	{
-		___lar_tag_stack[i] = i;
+		__lar_tag_stack[i] = i;
 	}
-	___curr_tag_stack_index = ___lar_tag_stack.size() - 1;
+	__curr_tag_stack_index = __lar_tag_stack.size() - 1;
 }
 
 LarFile::~LarFile()
@@ -45,25 +45,25 @@ void LarFile::perf_ldst(bool is_store, size_t ddest_index,
 
 
 	const Address n_base_addr = get_bits_with_range(eff_addr,
-		((sizeof(Address) * 8) - 1), WIDTH___METADATA_DATA_OFFSET);
+		((sizeof(Address) * 8) - 1), WIDTH__METADATA_DATA_OFFSET);
 	const Address n_data_offset = get_bits_with_range(eff_addr,
-		(WIDTH___METADATA_DATA_OFFSET - 1), 0);
+		(WIDTH__METADATA_DATA_OFFSET - 1), 0);
 
 
-	u8 temp_tag_search_arr[ARR_SIZE___NUM_LARS];
+	u8 temp_tag_search_arr[ARR_SIZE__NUM_LARS];
 	u8 tag_search = 0;
 
-	for (size_t i=0; i<ARR_SIZE___NUM_LARS; ++i)
+	for (size_t i=0; i<ARR_SIZE__NUM_LARS; ++i)
 	{
 		temp_tag_search_arr[i] = perf_temp_tag_search(i, n_base_addr);
 	}
 
-	for (size_t i=0; i<ARR_SIZE___NUM_LARS; ++i)
+	for (size_t i=0; i<ARR_SIZE__NUM_LARS; ++i)
 	{
 		tag_search |= temp_tag_search_arr[i];
 	}
 
-	auto& ddest_metadata = ___lar_metadata[ddest_index];
+	auto& ddest_metadata = __lar_metadata[ddest_index];
 	ddest_metadata.data_offset = n_data_offset;
 	ddest_metadata.data_type = n_data_type;
 	ddest_metadata.type_size = n_type_size;
@@ -81,7 +81,7 @@ void LarFile::perf_ldst(bool is_store, size_t ddest_index,
 		break;
 	}
 
-	//auto& ddest_shareddata = ___lar_shareddata[ddest_metadata.tag];
+	//auto& ddest_shareddata = __lar_shareddata[ddest_metadata.tag];
 	//printout("LarFile::perf_ldst() results:  ",
 	//	std::hex, ddest_shareddata.data, " ",
 	//	ddest_shareddata.base_addr, std::dec, " ",
@@ -107,8 +107,8 @@ void LarFile::handle_ldst_hit(bool is_store, LarMetadata& ddest_metadata,
 
 	ddest_metadata.tag = tag_search;
 
-	auto& n_shareddata = ___lar_shareddata[tag_search];
-	auto& curr_shareddata = ___lar_shareddata[old_tag];
+	auto& n_shareddata = __lar_shareddata[tag_search];
+	auto& curr_shareddata = __lar_shareddata[old_tag];
 
 
 
@@ -166,7 +166,7 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 	std::unique_ptr<BasicWord[]>& mem)
 {
 	const auto old_metadata = ddest_metadata;
-	auto& curr_shareddata = ___lar_shareddata[old_metadata.tag];
+	auto& curr_shareddata = __lar_shareddata[old_metadata.tag];
 	const auto old_base_addr = curr_shareddata.base_addr;
 
 	//printout("LarFile::handle_ldst_miss():  ",
@@ -186,7 +186,7 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 			ddest_metadata.tag = alloc_tag();
 			//printout("ddest_metadata.tag:  ",
 			//	static_cast<u32>(ddest_metadata.tag), "\n");
-			auto& n_shareddata = ___lar_shareddata[ddest_metadata.tag];
+			auto& n_shareddata = __lar_shareddata[ddest_metadata.tag];
 			n_shareddata.base_addr = n_base_addr;
 			n_shareddata.ref_count = 1;
 
@@ -257,7 +257,7 @@ void LarFile::handle_ldst_miss(bool is_store, LarMetadata& ddest_metadata,
 		{
 			// Allocate a new element of shared data.
 			ddest_metadata.tag = alloc_tag();
-			auto& n_shareddata = ___lar_shareddata[ddest_metadata.tag];
+			auto& n_shareddata = __lar_shareddata[ddest_metadata.tag];
 			n_shareddata.base_addr = n_base_addr;
 			n_shareddata.ref_count = 1;
 
